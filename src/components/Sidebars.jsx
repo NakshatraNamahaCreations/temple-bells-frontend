@@ -103,7 +103,7 @@ const Sidebars = () => {
       <div className="w-100 d-flex justify-content-center" style={{ backgroundColor: "black" }}>
         <Link to="/dashboard">
           <img
-            src={logo}
+            // src={logo}
             alt="logo"
             style={{ width: "200px" }}
             className="mx-auto"

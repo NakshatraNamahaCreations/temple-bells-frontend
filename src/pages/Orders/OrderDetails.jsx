@@ -1263,12 +1263,12 @@ const OrderDetails = () => {
 
                         <td>{prod.productName}</td>
                         <td>
-                          <img
+                          {/* <img
                             src={`${ImageApiURL}/product/${prod.ProductIcon}`}
                             alt={prod.productName}
                             style={{ width: "50px", height: "50px" }}
                             crossOrigin="anonymous"
-                          />
+                          /> */}
                         </td>
                         {!pdfMode && (
                           <td style={{ color: "#1a73e8", fontWeight: 500 }}>

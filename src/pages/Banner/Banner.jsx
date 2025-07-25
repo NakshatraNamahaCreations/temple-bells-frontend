@@ -214,7 +214,7 @@ const filteredBanners = banners.filter((banner) =>
                   </td>
                   <td className="text-start">{banner?._id}</td>
                   <td className="text-start">
-                    {banner.banner ? (
+                    {/* {banner.banner ? (
                       <img
                         src={`${ImageApiURL}/userbanner/${banner.banner}`}
                         alt="Banner"
@@ -226,7 +226,7 @@ const filteredBanners = banners.filter((banner) =>
                       />
                     ) : (
                       "No Image"
-                    )}
+                    )} */}
                   </td>
                   <td className="text-center">
                     <Button

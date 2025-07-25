@@ -235,7 +235,7 @@ const ProductManagement = () => {
                     />
                   </td>
                   <td>
-                    <img
+                    {/* <img
                       // src={`${ImageApiURL}product/${product.ProductIcon}`}
                       src={`${ImageApiURL}/product/${product.ProductIcon}`}
                       alt={product.ProductIcon}
@@ -246,7 +246,7 @@ const ProductManagement = () => {
                         borderRadius: "4px",
                         fontSize: "12px",
                       }}
-                    />
+                    /> */}
                   </td>
                   <td
                     className="fw-semibold text-start"

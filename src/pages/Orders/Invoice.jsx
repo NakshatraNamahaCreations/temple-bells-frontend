@@ -292,12 +292,12 @@ const Invoice = () => {
                 <td className="text-center">{item.productSlot || "-"}</td>
                 <td>{item.productName || "-"}</td>
                 <td>
-                  <img
+                  {/* <img
                     src={`${ImageApiURL}/product/${item.ProductIcon}`}
                     alt={item.productName}
                     style={{ width: "50px", height: "50px" }}
                     crossOrigin="anonymous"
-                  />
+                  /> */}
                 </td>
                 <td className="text-center">998596</td>
                 <td className="text-center">{item.quantity || "-"}</td>

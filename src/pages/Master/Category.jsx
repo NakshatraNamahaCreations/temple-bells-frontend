@@ -110,7 +110,7 @@ const Category = () => {
     setNewCategory({
       categoryName: selected.category,
       categoryImage: selected.categoryImg,
-      previewImage: `${ImageApiURL}/category/${selected.categoryImg}`,
+      // previewImage: `${ImageApiURL}/category/${selected.categoryImg}`,
     });
     setIsEditing(true);
     setEditingId(id);
@@ -264,7 +264,7 @@ const Category = () => {
                   </td>
                   <td className="text-start">{categoryItem.category}</td>
                   <td className="text-start">
-                    <img
+                    {/* <img
                       src={`${ImageApiURL}/category/${categoryItem.categoryImg}`}
                       alt={categoryItem.category}
                       style={{
@@ -273,7 +273,7 @@ const Category = () => {
                         objectFit: "cover",
                         borderRadius: "4px",
                       }}
-                    />
+                    /> */}
                   </td>
                   <td>
                     <Button

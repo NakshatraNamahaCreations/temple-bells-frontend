@@ -117,13 +117,13 @@ const QuotationInvoice = () => {
                 <td style={{ border: "1px solid #666", padding: 8 }}>{product.productName}</td>
                 <td style={{ border: "1px solid #666", padding: 8 }}>{productDates[product.productId]?.productSlot || quotation?.quoteTime}</td>
                 <td style={{ border: "1px solid #666", padding: 8 }}>
-                  {product.image && (
+                  {/* {product.image && (
                     <img
                       src={`${ImageApiURL}/product/${product.image}`}
                       alt={product.productName}
                       style={{ width: '50px', height: '50px', objectFit: 'cover' }}
                     />
-                  )}
+                  )} */}
                 </td>
                 <td style={{ border: "1px solid #666", padding: 8 }}>{product.pricePerUnit}</td>
                 <td style={{ border: "1px solid #666", padding: 8 }}>{product.quantity}</td>

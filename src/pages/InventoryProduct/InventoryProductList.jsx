@@ -117,7 +117,7 @@ const InventoryProduct = () => {
         <Row className="g-3 align-items-end">
           <Col md={4}>
             <Form.Group controlId="deliveryDate">
-            <h6 className="text-dark">Start Date</h6>
+              <h6 className="text-dark">Start Date</h6>
               {/* <Form.Control
                 type="date"
                 value={deliveryDate}
@@ -137,7 +137,7 @@ const InventoryProduct = () => {
           </Col>
           <Col md={4}>
             <Form.Group controlId="dismantleDate">
-            <h6 className="text-dark">End Date</h6>
+              <h6 className="text-dark">End Date</h6>
               <DatePicker
                 selected={dismantleDate} // Default to initial quoteDate
                 onChange={(date) => {
@@ -190,7 +190,7 @@ const InventoryProduct = () => {
               border: "none",
               color: "white",
               transition: "background 0.2s",
-            }}          
+            }}
             onClick={handleFetchInventory}
           >
             Fetch Filtered Inventory
@@ -203,7 +203,7 @@ const InventoryProduct = () => {
               border: "none",
               color: "white",
               transition: "background 0.2s",
-            }}          
+            }}
             // className="w-100"
             onClick={handleExport}
           >
@@ -235,13 +235,13 @@ const InventoryProduct = () => {
                       <tr key={item.productId}>
                         <td>{item.productName}</td>
                         <td>
-                          {icon && (
+                          {/* {icon && (
                             <img
                               src={`${ImageApiURL}/product/${icon}`}
                               alt={item.productName}
                               style={{ width: "64px", height: "32px", marginRight: 8, objectFit: "contain" }}
                             />
-                          )}
+                          )} */}
 
                         </td>
                         <td>{item.availableStock}</td>

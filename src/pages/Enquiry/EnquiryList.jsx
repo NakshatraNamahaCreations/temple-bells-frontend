@@ -24,8 +24,9 @@ const EnquiryList = () => {
       setLoading(true);
       try {
         const res = await axios.get(`${ApiURL}/Enquiry/getallEnquiry`);
+        console.log(`res.data: `, res.data);
         if (res.status === 200) {
-          setEnquiries(res.data.enquiryData);
+          setEnquiries(res.data);
         }
       } catch (error) {
         console.error("Error fetching enquiries:", error);

@@ -124,7 +124,7 @@ const AddNewEnquiry = () => {
   };
 
   const fetchProducts = async () => {
-    try {
+    try { 
       const res = await axios.get(`${ApiURL}/product/quoteproducts`);
       if (res.status === 200) {
         setAllProducts(res.data.QuoteProduct);
@@ -484,13 +484,13 @@ const AddNewEnquiry = () => {
                           >
                             {/* Show image if available */}
                             <img
-                              // src={
-                              //   p.img
-                              //     ? p.img
-                              //     : p.ProductIcon
-                              //       ? `${ImageApiURL}/product/${p.ProductIcon}`
-                              //       : "https://via.placeholder.com/36x28?text=No+Img"
-                              // }
+                              src={
+                                p.img
+                                  ? p.img
+                                  : p.ProductIcon
+                                    ? `${ImageApiURL}/product/${p.ProductIcon}`
+                                    : "https://via.placeholder.com/36x28?text=No+Img"
+                              }
                               alt={p.name || p.ProductName}
                               style={{
                                 width: 28,

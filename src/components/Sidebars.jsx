@@ -21,13 +21,25 @@ import logo from "../assets/theweddingrentals.png";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { config } from "../services/config";
+import { ApiURL } from "../api";
 // import logo from "../assets/theweddingrentals.svg";
+
+const storePermissionsWithExpiry = (permissions) => {
+  const expiryTime = new Date().getTime() + 3600000; // 1 hour from now (3600000 ms = 1 hour)
+
+  // Store permissions and expiry time in sessionStorage
+  sessionStorage.setItem("permissions", JSON.stringify({
+    data: permissions,
+    expiry: expiryTime
+  }));
+};
+
 
 const Sidebars = () => {
   const [userAccess, setUserAccess] = useState({});
   const location = useLocation();
   const token = sessionStorage.getItem("token");
-  // const userAccess = JSON.parse(sessionStorage.getItem("roles"))
+  // const userAccess = JSON.parse(sessionStorage.getItem("permissions"))
 
   const menuItems = [
     { key: "dashboard", name: "Dashboard", path: "/dashboard", icon: MdDashboard },
@@ -35,13 +47,16 @@ const Sidebars = () => {
     { key: "banner", name: "Banner", path: "/banner", icon: FaTags },
     { key: "productManagement", name: "Product Management", path: "/product-management", icon: FaBoxOpen },
     { key: "clients", name: "Clients", path: "/client", icon: FaUserFriends },
+    // { key: "executiveManagement", name: "Executive Management", path: "/executive-management", icon: MdInventory },
+    // { key: "addNewEnquiry", name: "Add new enq", path: "/add-new-enquiry", icon: MdInventory },
+    // { key: "myOrders", name: "Add new enq", path: "/my-orders", icon: MdInventory },
     { key: "enquiryList", name: "Enquiry List", path: "/enquiry-list", icon: MdOutlineSupportAgent },
     { key: "enquiryCalendar", name: "Enquiry Calendar", path: "/enquiry-calender", icon: FaCalendarAlt },
     { key: "quotation", name: "Quotation", path: "/quotation", icon: FaFileInvoiceDollar },
     { key: "orders", name: "Orders", path: "/orders", icon: FaShoppingBag },
     { key: "termsAndConditions", name: "Terms & Conditions", path: "/terms-conditions", icon: FaFileContract },
     { key: "paymentReport", name: "Payment Report", path: "/payment-report", icon: FaChartBar },
-    { key: "refurbishmentReport", name: "Refurbishment Report", path: "/refurbihsment-report", icon: FaTools },
+    // { key: "refurbishmentReport", name: "Refurbishment Report", path: "/refurbihsment-report", icon: FaTools },
     { key: "inventoryProductList", name: "Inventory Product List", path: "/inventory-product-list", icon: MdInventory },
     { key: "adminRights", name: "Admin Rights", path: "/admin-rights", icon: MdInventory },
     // {
@@ -61,14 +76,39 @@ const Sidebars = () => {
   useEffect(() => {
     const fetchAdminPermissions = async () => {
       console.log(`fetching permissions in sidebar`);
+      const storedData = sessionStorage.getItem("permissions");
+      if (storedData) {
+        const { data, expiry } = JSON.parse(storedData);
+
+        // Check if the stored data is expired
+        if (new Date().getTime() <= expiry) {
+          // If not expired, use the stored permissions
+          setUserAccess(data);
+          console.log('Using cached permissions:', data);
+          return;
+        } else {
+          // If expired, remove from sessionStorage
+          sessionStorage.removeItem("permissions");
+        }
+      }
+
       try {
-        const res = await axios.get(`${config.API_BASE_URL}/admins/permissions`, {
+        const res = await axios.get(`${ApiURL}/admins/permissions`, {
           headers: {
             Authorization: `Bearer ${token}`
           },
         })
         console.log(`admin access: `, res.data);
-        setUserAccess(res.data.admin.roles)
+        const expiryTime = new Date().getTime() + 3600000;  // 1 hour from now (3600000 ms = 1 hour)
+
+        // Store permissions and expiry time in sessionStorage
+        sessionStorage.setItem("permissions", JSON.stringify({
+          data: res.data.admin.permissions,
+          expiry: expiryTime
+        }));
+
+        // Set state for the user access
+        setUserAccess(res.data.admin.permissions);
       } catch (error) {
         console.error(error)
       }
@@ -103,7 +143,7 @@ const Sidebars = () => {
       <div className="w-100 d-flex justify-content-center" style={{ backgroundColor: "black" }}>
         <Link to="/dashboard">
           <img
-            // src={logo}
+            src={logo}
             alt="logo"
             style={{ width: "200px" }}
             className="mx-auto"

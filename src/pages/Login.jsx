@@ -30,10 +30,10 @@ const Login = ({ handleLogin }) => {
       if (response.status === 200) {
         toast.success("Login successful");
         sessionStorage.setItem("token", response.data.token);
-        console.log(`roles: `, response.data.roles);
-        sessionStorage.setItem("roles", JSON.stringify(response.data.roles));
-        console.log(`sessionStorage.getItem("roles"): `, sessionStorage.getItem("roles"));
-        handleLogin && handleLogin(response.data.roles);
+        console.log(`permissions: `, response.data.permissions);
+        sessionStorage.setItem("permissions", JSON.stringify(response.data.permissions));
+        console.log(`sessionStorage.getItem("permissions"): `, sessionStorage.getItem("permissions"));
+        handleLogin && handleLogin(response.data.permissions);
         navigate("/dashboard");
       } else {
         toast.error("Login failed");

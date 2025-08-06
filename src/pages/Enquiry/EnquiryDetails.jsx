@@ -196,9 +196,7 @@ const EnquiryDetails = () => {
   // console.log(`alprods : `, allProducts);
   console.log("enquiry: ", enquiry);
   console.log("filtered prods: ", filteredProducts);
-  const clientNo = enquiry?.clientDetails?.executives?.find(
-    (exec) => exec.name === enquiry.executivename
-  )?.phoneNumber || "N/A";
+  const clientNo = enquiry?.clientNo || "N/A";
 
   console.log(`clietnno:  `, clientNo);
   const dateFormat = (dateStr) => {
@@ -369,11 +367,12 @@ const EnquiryDetails = () => {
         data: {
           enquiryObjectId: enquiry._id,
           enquiryId: enquiry.enquiryId,
-          userId:enquiry.userId,
+          userId: enquiry.userId,
           quoteTime: enquiry.enquiryTime,
           quoteDate: enquiry.enquiryDate,
           endDate: enquiry.endDate,
           clientId: enquiry.clientId,
+          executiveId: enquiry.executiveId,
           clientName: enquiry.clientName,
           executivename: enquiry.executivename,
           workerAmt: 0, // or your value
@@ -385,7 +384,7 @@ const EnquiryDetails = () => {
           discount: Number(discount) || 0,
           status: "pending", // or use enquiry.status if you want
           termsandCondition: enquiry.termsandCondition || [],
-          clientNo: enquiry.clientDetails?.executives?.[0]?.phoneNumber || "",
+          clientNo: enquiry?.clientNo || "",
           address: enquiry.address,
           labourecharge: Number(manpower) || 0,
           transportcharge: Number(transport) || 0,

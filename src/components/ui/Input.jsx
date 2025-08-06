@@ -1,7 +1,7 @@
 export const Input = ({
   placeholder,
   value,
-  onChange = () => {}, // default fallback
+  onChange = () => { }, // default fallback
   type = "text",
   className = "",
   name = "",

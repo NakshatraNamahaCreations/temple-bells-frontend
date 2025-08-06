@@ -14,7 +14,6 @@ function Layout({ children, handleLogout, roles }) {
 
   return (
     <>
-
       <div className="d-flex hide-scrollbar ">
         <div className="col-md-2">
           <Sidebars />
@@ -28,6 +27,6 @@ function Layout({ children, handleLogout, roles }) {
       </div>
     </>
   );
-}
+};
 
 export default Layout;

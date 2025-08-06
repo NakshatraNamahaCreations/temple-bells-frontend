@@ -7,7 +7,7 @@
 //     refurbishmentId: "6843d5bfa4ace71e97bb07fe",
 //     date: "07-06-2025",
 //     from: {
-//       name: "The Wedding Rentals",
+//       name: "The Wedding rentals",
 //       phone: "+91 xxxxxxxxxx",
 //     },
 //     products: [
@@ -234,7 +234,7 @@ const RefurbishmentInvoice = () => {
                 <div>
                   <strong>From:</strong>
                 </div>
-                <div>The Wedding Rentals</div>
+                <div>The Wedding rentals</div>
                 <div>+91 xxxxxxxxxx</div>
               </Col>
             </Row>

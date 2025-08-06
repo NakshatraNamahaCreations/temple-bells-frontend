@@ -90,6 +90,8 @@ const OrderDetails = () => {
     comments: "",
     date: new Date().toLocaleDateString("en-GB").split("/").join("-"),
   });
+  const [amountPaid, setAmountPaid] = useState(0)
+  const [amountPending, setAmountPending] = useState(0)
 
   // Add roundOff state
   const [roundOff, setRoundOff] = useState(0);
@@ -488,7 +490,7 @@ const OrderDetails = () => {
     try {
       // Send the updated quantity to the backend for processing
       const response = await axios.put(
-        `${ApiURL}/order/updateOrderById/${order._id}`,
+        `${ApiURL}/order/addNewProductToOrderById/${order._id}`,
         {
           productId: selectedAddProduct._id,
           productName: selectedAddProduct.ProductName,
@@ -570,7 +572,7 @@ const OrderDetails = () => {
       console.log("Generated response object:", responseObj);
 
       const response = await axios.put(
-        `${ApiURL}/order/updateOrderById/${order._id}`,
+        `${ApiURL}/order/updateExistingOrderById/${order._id}`,
         {
           productId: order.slots[0].products[idx].productId, // The ID of the product being updated
           // unitPrice: productObj.ProductPrice,
@@ -759,11 +761,41 @@ const OrderDetails = () => {
   }, [order]); // Re-run the effect whenever order changes
 
   const calculateGrandTotal = (order) => {
-    const productTotal = (order?.slots[0]?.products || []).reduce((sum, item) => {
-      // console.log("item: ", item);
-      const days = productDays[item.productId] || 1; // Get days for each product
-      return sum + (item.total || 0); // Multiply total by days for each product
-    }, 0);
+    // const productTotal = (order?.slots[0]?.products || []).reduce((sum, item) => {
+    //   // console.log("item: ", item);
+    //   const days = productDays[item.productId] || 1; // Get days for each product
+    //   return sum + (item.total || 0); // Multiply total by days for each product
+    // }, 0);
+
+    products.forEach((prod, idx) => {
+      console.log(`calculateGrandTotal prods: `, products);
+
+      if (idx === 0) console.log("prod order:", prod);
+      let days = 1;
+      const quoteDate = prod.productQuoteDate || slot.quoteDate;
+      const endDate = prod.productEndDate || slot.endDate;
+
+      if (quoteDate && endDate) {
+        const start =
+          quoteDate instanceof Date
+            ? quoteDate
+            : parseDate(quoteDate);
+        const end =
+          endDate instanceof Date ? endDate : parseDate(endDate);
+        days =
+          Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+        if (isNaN(days) || days < 1) days = 1;
+      }
+
+      const price = prod.ProductPrice || 0;
+      prod.days = days;
+      prod.productTotal = price * days * prod.quantity;
+      console.log(`${prod.productName} productTotal: ${prod.productTotal}`)
+
+      if (idx === 0) console.log("date difference fr prod.prodname: ", prod.productName, days);
+    })
+
+    const allProductsTotal = products.reduce((sum, prod) => sum + (prod.productTotal || 0), 0)
 
     // console.log("order.slots.prods: ", order.slots[0].products)
     // console.log("productTotal: ", productTotal)
@@ -776,17 +808,44 @@ const OrderDetails = () => {
     // const adjustments = order.adjustments || 0;
 
     // const subtotal = productTotal + labour + transport - adjustments;
-    const discountAmount = (productTotal * discountPercent) / 100;
-    const totalBeforeCharges = productTotal - discountAmount;
+    const discountAmount = (allProductsTotal * discountPercent) / 100;
+    const totalBeforeCharges = allProductsTotal - discountAmount;
     const totalAfterCharges = totalBeforeCharges + labour + transport + refurbishmentAmount;
     const gstAmount = ((totalAfterCharges) * gstPercent) / 100;
 
     // console.log("calc: ", subtotal - discountAmount + gstAmount)
 
+
+    // console.log("allProductsTotal: ", allProductsTotal)
+    // console.log("transport: ", transport)
+    // console.log("labour: ", labour)
+    // console.log("discountPercent: ", discountPercent)
+    // console.log("discountAmount: ", discountAmount)
+    // console.log("totalBeforeCharges: ", totalBeforeCharges)
+    // console.log("totalAfterCharges: ", totalAfterCharges)
+    // console.log("refurbishmentAmount: ", refurbishmentAmount)
+    // console.log("gstPercent: ", gstPercent)
+    // console.log("gstAmount: ", gstAmount)
+
     return Math.round(totalAfterCharges + gstAmount);
   };
 
   const grandTotal = order ? calculateGrandTotal(order) : 0;
+
+  useEffect(() => {
+    const paid = order?.payments.reduce((acc, curr) => acc + curr?.advancedAmount, 0)
+    setAmountPaid(paid)
+
+    if (order?.roundOff !== 0) {
+      console.log(`order?.roundOff === 0: `, order?.roundOff);
+      const pending = grandTotal - order?.roundOff - paid
+      setAmountPending(pending)
+    } else {
+      console.log(`order?.grandTotal === 0: `, grandTotal);
+      const pending = grandTotal - paid
+      setAmountPending(pending)
+    }
+  }, [order, grandTotal])
 
   useEffect(() => {
     console.log("useeffect");
@@ -977,7 +1036,7 @@ const OrderDetails = () => {
               <Col xs={12} md={6}>
                 <div className="mb-1" style={{ display: "flex", gap: "10px" }}>
                   <span style={labelStyle}>Client Id:</span>
-                  <span style={valueStyle}>{order.ClientId}</span>
+                  <span style={valueStyle}>{order.clientId}</span>
                 </div>
                 <div className="mb-1" style={{ display: "flex", gap: "10px" }}>
                   <span style={labelStyle}>Company Name: </span>
@@ -995,8 +1054,6 @@ const OrderDetails = () => {
                   <span style={labelStyle}>Address: </span>
                   <span style={valueStyle}>{order.placeaddress}</span>
                 </div>
-              </Col>
-              <Col xs={12} md={6}>
                 {!pdfMode && (
                   <div className="mb-1" style={{ display: "flex", gap: "10px" }}>
                     <span style={labelStyle}>Order Status: </span>
@@ -1007,27 +1064,41 @@ const OrderDetails = () => {
                     </span>
                   </div>
                 )}
+              </Col>
+              <Col xs={12} md={6}>
                 {/* {!pdfMode && ( */}
+                <div className="mb-1" style={{ display: "flex", gap: "10px" }}>
+                  <span style={labelStyle}>Venue address:</span>
+                  <span style={valueStyle}>{order.Address}</span>
+                </div>
                 <div className="mb-1" style={{ display: "flex", gap: "10px" }}>
                   <span style={labelStyle}>Grand Total: </span>
                   <span style={valueStyle}>₹ {grandTotal}</span>
                 </div>
                 {/* )} */}
-                <div className="mb-1" style={{ display: "flex", gap: "10px" }}>
-                  <span style={labelStyle}>Venue address:</span>
-                  <span style={valueStyle}>{order.Address}</span>
+                {/* <div className="mb-1" style={{ display: "flex", gap: "10px" }}>
+                  <span style={labelStyle}>Man power: </span>
+                  <span style={valueStyle}>₹ {order.labourecharge}</span>
                 </div>
-                <div className="mb-1" style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                  <span style={labelStyle}>RoundOff:</span>
+                <div className="mb-1" style={{ display: "flex", gap: "10px" }}>
+                  <span style={labelStyle}>Transport: </span>
+                  <span style={valueStyle}>₹ {order.transportcharge}</span>
+                </div> */}
+                <div
+                  className="mb-1"
+                  style={{ display: "flex", gap: "10px", alignItems: "center", lineHeight: "1.2" }}
+                >
+                  <span style={labelStyle}>Roundoff:</span>
                   {!isEditingRoundOff ? (
                     <>
                       <span style={valueStyle}>₹ {roundOff}</span>
                       <Button
                         variant="link"
                         size="sm"
+                        style={{ padding: "0", height: "20px", display: "flex", alignItems: "center" }}
                         onClick={() => setIsEditingRoundOff(true)}
                       >
-                        <FaEdit className="fa-sm" />
+                        <FaEdit style={{ fontSize: "14px", margin: "0" }} />
                       </Button>
                     </>
                   ) : (
@@ -1058,7 +1129,11 @@ const OrderDetails = () => {
                 </div>
                 <div className="mb-1" style={{ display: "flex", gap: "10px" }}>
                   <span style={labelStyle}>paid so far:</span>
-                  <span style={valueStyle}>₹ {order?.payments.reduce((acc, curr) => acc + curr?.advancedAmount, 0)}</span>
+                  <span style={valueStyle}>₹ {amountPaid}</span>
+                </div>
+                <div className="mb-1" style={{ display: "flex", gap: "10px" }}>
+                  <span style={labelStyle}>remaining pay:</span>
+                  <span style={valueStyle}>₹ {amountPending}</span>
                 </div>
               </Col>
             </Row>
@@ -1088,6 +1163,9 @@ const OrderDetails = () => {
                 </div>
               )}
             </div>
+
+
+            {/* products table */}
             <div className="table-responsive mb-3">
               <Table
                 bordered
@@ -1114,23 +1192,30 @@ const OrderDetails = () => {
                     //     ? `${order.slots[0].quoteDate} to ${order.slots[0].endDate}`
                     //     : "No Slot";
 
-                    // console.log("prod order:", prod);
-                    let days = 1;
-                    const quoteDate = prod.productQuoteDate || slot.quoteDate;
-                    const endDate = prod.productEndDate || slot.endDate;
+                    // see if grandottal calc works here too
+                    // if (idx === 0) console.log("prod order:", prod);
+                    // let days = 1;
+                    // const quoteDate = prod.productQuoteDate || slot.quoteDate;
+                    // const endDate = prod.productEndDate || slot.endDate;
 
-                    if (quoteDate && endDate) {
-                      const start =
-                        quoteDate instanceof Date
-                          ? quoteDate
-                          : parseDate(quoteDate);
-                      const end =
-                        endDate instanceof Date ? endDate : parseDate(endDate);
-                      days =
-                        Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
-                      if (isNaN(days) || days < 1) days = 1;
-                    }
-                    // console.log("date difference: ", days);
+                    // if (quoteDate && endDate) {
+                    //   const start =
+                    //     quoteDate instanceof Date
+                    //       ? quoteDate
+                    //       : parseDate(quoteDate);
+                    //   const end =
+                    //     endDate instanceof Date ? endDate : parseDate(endDate);
+                    //   days =
+                    //     Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+                    //   if (isNaN(days) || days < 1) days = 1;
+                    // }
+
+                    // const price = prod.ProductPrice || 0;
+                    // prod.days = days;
+                    // prod.productTotal = price * days * prod.quantity;
+                    // console.log(`${prod.productName} productTotal: ${prod.productTotal}`)
+
+                    // if (idx === 0) console.log("date difference fr prod.prodname: ", prod.productName, days);
 
                     return (
                       <tr key={idx}>
@@ -1263,12 +1348,12 @@ const OrderDetails = () => {
 
                         <td>{prod.productName}</td>
                         <td>
-                          {/* <img
+                          <img
                             src={`${ImageApiURL}/product/${prod.ProductIcon}`}
                             alt={prod.productName}
                             style={{ width: "50px", height: "50px" }}
                             crossOrigin="anonymous"
-                          /> */}
+                          />
                         </td>
                         {!pdfMode && (
                           <td style={{ color: "#1a73e8", fontWeight: 500 }}>
@@ -1307,9 +1392,10 @@ const OrderDetails = () => {
                             prod.quantity
                           )}
                         </td>
-                        <td>{days}</td>
+                        <td>{prod.days}</td>
                         <td>₹{(prod.ProductPrice)}</td>
-                        <td>₹{prod.total}</td>
+                        <td>₹{prod.productTotal}</td>
+                        {/* {(idx === 0) && console.log(`prod.total * days: ${prod.total * days} prod.productName: ${prod.productName}prod.total: ${prod.total}`)} */}
                         {!pdfMode && (
                           <td>
                             {editIdx === idx ? (
@@ -1365,6 +1451,29 @@ const OrderDetails = () => {
                       </tr>
                     );
                   })}
+                  {console.log(`*** products: `, products)}
+                  {
+                    (
+                      <tr>
+                        <td colSpan={6} className="text-end">
+                          <strong>Products Total:</strong>
+                        </td>
+                        <td className="text-end">
+                          <strong>₹{products.reduce((acc, curr) => acc + curr?.productTotal, 0)}</strong>
+                        </td>
+                      </tr>
+                    )}
+                  {
+                    (
+                      <tr>
+                        <td colSpan={6} className="text-end">
+                          <strong>Paid Total:</strong>
+                        </td>
+                        <td className="text-end">
+                          <strong>₹{order?.payments.reduce((acc, curr) => acc + curr?.advancedAmount, 0)}</strong>
+                        </td>
+                      </tr>
+                    )}
                 </tbody>
               </Table>
             </div>
@@ -1412,7 +1521,7 @@ const OrderDetails = () => {
                   variant="primary"
                   size="sm"
                   style={{ fontSize: 13, fontWeight: 600 }}
-                  onClick={() => navigate(`/invoice/${id}`)}
+                  onClick={() => navigate(`/invoice/${id}`, { state: { orderData: order, grandTotal } })}
                   disabled={order && order.orderStatus === "cancelled"}
                 >
                   Generate Invoice
@@ -1835,7 +1944,32 @@ const OrderDetails = () => {
                   <Form.Control
                     type="number"
                     name="amount"
-                    value={order?.payments.reduce((acc, curr) => acc + curr?.advancedAmount, 0)}
+                    value={amountPaid}
+                    max={order?.GrandTotal}
+                    // onChange={(e) => setPaymentData((prev) => ({ ...prev, amount: e.target.value }))}
+                    placeholder="0"
+                    disabled
+                    style={{ borderRadius: "6px", borderColor: "#e0e0e0" }}
+                  />
+                </div>
+                <Form.Label style={{ fontWeight: "500", color: "#34495e" }}>
+                  Amount Pending
+                </Form.Label>
+                {console.log("payments: ", order?.payments.reduce((acc, curr) => acc + curr?.advancedAmount, 0))}
+                <div className="d-flex align-items-center">
+                  <span
+                    style={{
+                      marginRight: "10px",
+                      fontSize: "1.2rem",
+                      color: "#34495e",
+                    }}
+                  >
+                    ₹
+                  </span>
+                  <Form.Control
+                    type="number"
+                    name="amount"
+                    value={amountPending}
                     max={order?.GrandTotal}
                     // onChange={(e) => setPaymentData((prev) => ({ ...prev, amount: e.target.value }))}
                     placeholder="0"

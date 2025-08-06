@@ -332,9 +332,9 @@ const Header = () => {
         <p className="fs-5 fw-bold mb-0">{currentTab}</p>
       </div>
 
-      <div className="position-relative">
+      {/* <div className="position-relative">
         <FaUserCircle className="fs-3" style={{ cursor: "pointer" }} />
-      </div>
+      </div> */}
     </div>
   );
 };

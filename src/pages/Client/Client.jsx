@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Card, Table, Container, Modal, Form } from "react-bootstrap";
 import Pagination from "../../components/Pagination";
-import { FaTrashAlt } from "react-icons/fa";
+import { FaEdit, FaTrashAlt } from "react-icons/fa";
 import { MdVisibility } from "react-icons/md";
 import { FaEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +17,10 @@ const Client = () => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [viewClient, setViewClient] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
+  const [editClient, setEditClient] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
   // Fetch clients from API
@@ -27,10 +31,11 @@ const Client = () => {
   const fetchClients = async () => {
     try {
       const res = await axios.get(`${ApiURL}/client/getallClients`);
+      console.log(`res.data: `, res.data);
       if (res.status === 200 && Array.isArray(res.data.Client)) {
         // Map API data to expected structure
         const mapped = res.data.Client.map((c) => ({
-          companyName: c.clientName || "N/A",
+          companyName: c.name || "N/A",
           contactPersonNumber: c.phoneNumber || "N/A",
           email: c.email || "N/A",
           address: c.address || "N/A",
@@ -61,7 +66,7 @@ const Client = () => {
     if (!client || !client._id) return;
     if (!window.confirm("Are you sure you want to delete this client?")) return;
     try {
-      await axios.delete(`${ApiURL}/client/deleteClients/${client._id}`);
+      await axios.delete(`${ApiURL}/client/deleteClient/${client._id}`);
       fetchClients();
       setSelectedRows((prev) => prev.filter((i) => i !== index));
     } catch (error) {
@@ -76,7 +81,7 @@ const Client = () => {
       const client = paginatedClients[idx];
       if (client && client._id) {
         try {
-          await axios.delete(`${ApiURL}/client/deleteClients/${client._id}`);
+          await axios.delete(`${ApiURL}/client/deleteClient/${client._id}`);
         } catch (error) {
           console.error("Error deleting client:", error);
         }
@@ -109,6 +114,46 @@ const Client = () => {
   const handleViewClient = (client) => {
     setViewClient(client);
     setShowViewModal(true);
+  };
+
+  const handleEditClient = (client) => {
+    setEditClient(client);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateClient = async (e) => {
+    e.preventDefault();
+    if (!editClient || !editClient._id) return;
+    console.log(`editClient: `, editClient);
+
+    try {
+      if (newPassword && newPassword !== confirmPassword) {
+        alert('Passwords do not match!');
+        return;
+      }
+
+      await axios.put(`${ApiURL}/client/editClient/${editClient._id}`, {
+        name: editClient.companyName,
+        phoneNumber: editClient.contactPersonNumber,
+        email: editClient.email,
+        address: editClient.address,
+        password: newPassword
+      });
+
+      // Update the local state
+      setClients((prevClients) =>
+        prevClients.map((client) =>
+          client._id === editClient._id ? editClient : client
+        )
+      );
+      setShowEditModal(false);
+      window.location.reload()
+
+      alert('Client updated successfully!');
+    } catch (error) {
+      console.error('Error updating client:', error);
+      alert('Error updating client. Please try again. ' + (error.response?.data?.error || 'Unknown error.'));
+    }
   };
 
   const handlePageChange = (page) => {
@@ -213,6 +258,15 @@ const Client = () => {
                       <FaEye />
                     </Button>
                     <Button
+                      variant="outline-success"
+                      size="sm"
+                      className="me-2 icon-btn"
+                      style={{ padding: "4px 8px", fontSize: "10px" }}
+                      onClick={() => handleEditClient(client)}
+                    >
+                      <FaEdit />
+                    </Button>
+                    <Button
                       variant="outline-danger"
                       size="sm"
                       style={{ padding: "4px 8px", fontSize: "10px" }}
@@ -259,10 +313,6 @@ const Client = () => {
                 <strong>Company Name:</strong> {viewClient.companyName}
               </p>
               <p>
-                <strong>Contact Person Number:</strong>{" "}
-                {viewClient.contactPersonNumber}
-              </p>
-              <p>
                 <strong>Email:</strong> {viewClient.email || "N/A"}
               </p>
               <p>
@@ -287,6 +337,91 @@ const Client = () => {
             Close
           </Button>
         </Modal.Footer>
+      </Modal>
+
+      {/* Edit Modal */}
+      <Modal
+        show={showEditModal}
+        onHide={() => setShowEditModal(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Client Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {editClient && (
+            <Form onSubmit={handleUpdateClient}>
+              <Form.Group className="mb-3">
+                <Form.Label>Company Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={editClient.companyName}
+                  onChange={(e) => setEditClient({ ...editClient, companyName: e.target.value })}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Contact Person Number</Form.Label>
+                <Form.Control
+                  type="tel"
+                  value={editClient.contactPersonNumber}
+                  onChange={(e) => setEditClient({ ...editClient, contactPersonNumber: e.target.value })}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  value={editClient.email}
+                  onChange={(e) => setEditClient({ ...editClient, email: e.target.value })}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Address</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  value={editClient.address}
+                  onChange={(e) => setEditClient({ ...editClient, address: e.target.value })}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>New Password</Form.Label>
+                <Form.Control
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Enter new password"
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Confirm Password</Form.Label>
+                <Form.Control
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm new password"
+                />
+              </Form.Group>
+
+              <Modal.Footer>
+                <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+                  Cancel
+                </Button>
+                <Button variant="primary" type="submit">
+                  Update Client
+                </Button>
+              </Modal.Footer>
+            </Form>
+          )}
+        </Modal.Body>
       </Modal>
     </Container>
   );

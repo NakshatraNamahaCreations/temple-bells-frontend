@@ -78,6 +78,9 @@ const QuotationDetails = () => {
   const [productDates, setProductDates] = useState({});
   const [items, setItems] = useState([]);
   const [editMode, setEditMode] = useState(false);
+  const [editDiscount, setEditDiscount] = useState(false);
+  const [editManPower, setEditManPower] = useState(false);
+  const [editTransport, setEditTransport] = useState(false);
   const [refurbishment, setRefurbishment] = useState(0);
 
   // const [grandTotal, setGrandTotal] = useState(0)
@@ -195,7 +198,7 @@ const QuotationDetails = () => {
     try {
       // First, make the API call to fetch payment data
       const orderDetails = {
-        quotationId: quotation?._id,
+        quotationId: quotation?.quoteId,
         totalAmount: quotation.finalTotal || quotation?.GrandTotal,
         advancedAmount: paymentData.amount,
         paymentMode: paymentData.status, // Send selected payment mode
@@ -298,11 +301,13 @@ const QuotationDetails = () => {
 
   const handleGenerateOrder = async () => {
     try {
+      console.log(`handleGenerateOrder quotation: `, quotation);
       // Prepare the order details from quotationDetails
       const orderDetails = {
         quoteId: quotation.quoteId,
         userId: quotation.userId,
-        ClientId: quotation?.clientId,
+        clientId: quotation?.clientId,
+        executiveId: quotation?.executiveId,
         clientNo: quotation?.clientNo,
         GrandTotal: quotation.finalTotal || grandTotal,
         refurbishmentAmount: quotation?.refurbishment || 0,
@@ -1065,7 +1070,7 @@ const QuotationDetails = () => {
                 >
                   Contact Number
                 </td>
-                <td style={{ width: "25%" }}>{quotation.clientNo || ""}</td>
+                <td style={{ width: "25%" }}>{quotation?.clientNo || ""}</td>
               </tr>
               <tr>
                 <td style={{ fontWeight: "500", color: "#34495e" }}>
@@ -1441,6 +1446,22 @@ const QuotationDetails = () => {
           >
             Cost Summary
           </h5>
+          {quotation.discount === 0 && <Button
+            style={{
+              fontWeight: "600",
+              color: "#2c3e50",
+              marginBottom: "20px",
+            }}
+            variant="link"
+            onClick={() => {
+              setEditDiscount(true)
+              quotation.discount = 1
+              console.log(`Add discount: `, quotation.discount)
+            }}
+          >
+            Add discount
+          </Button>}
+
           {/* <div className="d-flex justify-content-between mb-2">
             <span style={{ fontWeight: "600" }}>Products Total:</span>
             <span style={{ fontWeight: "600" }}>
@@ -1458,21 +1479,151 @@ const QuotationDetails = () => {
             <span>{quotation?.discount != 0 ? "Total amount before discount:" : "Total amount:"}</span>
             <span>₹{(quotation.allProductsTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
           </div>
-          {quotation?.discount != 0 && <div className="d-flex justify-content-between mb-2">
+          {(quotation?.discount != 0 || editDiscount) && <div className="d-flex justify-content-between mb-2">
             <span>Discount ({(quotation.discount || 0).toFixed(2)}%):</span>
-            <span>-₹{(quotation.discount / 100 * quotation.allProductsTotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            {/* <span>-₹{(quotation.discount / 100 * quotation.allProductsTotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span> */}
+            {!editDiscount ? (
+              <>
+                <div className="d-flex align-items-center">
+                  <Button variant="link" size="sm" onClick={() => setEditDiscount(true)}>
+                    <FaEdit />
+                  </Button>
+                  <span>-₹{(quotation.discount / 100 * quotation.allProductsTotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="d-flex align-items-center">
+                  <Form.Group controlId="discount" style={{ width: "150px" }}>
+                    <Form.Control
+                      type="number"
+                      value={quotation.discount}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value) || 0;
+                        setQuotation({ ...quotation, discount: value });
+                        // Update total calculations
+                        // quotation.refurbishment = value;
+                      }}
+                      min="0"
+                      step="0.01"
+                    />
+                  </Form.Group>
+                  <Button variant="primary" size="sm" className="ms-2" onClick={() => {
+                    setQuotation({ ...quotation, discount: quotation.discount });
+                    setEditDiscount(false)
+                  }}>
+                    Save
+                  </Button>
+                  <Button variant="secondary" size="sm" className="ms-2" onClick={() => {
+                    // Reset to original value
+                    setQuotation(prev => ({ ...prev, discount: prev.discount }));
+                    setEditDiscount(false);
+                  }}>
+                    Cancel
+                  </Button>
+                </div>
+              </>
+            )}
           </div>}
-          {quotation?.discount != 0 && <div className="d-flex justify-content-between mb-2" style={{ fontWeight: "600" }}>
+          {(quotation?.discount != 0 || editDiscount) && <div className="d-flex justify-content-between mb-2" style={{ fontWeight: "600" }}>          
             <span>Total amount after discount:</span>
             <span>₹{(quotation.afterDiscount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
           </div>}
           <div className="d-flex justify-content-between mb-2">
             <span>Transportation:</span>
-            <span>₹{(quotation.transportcharge || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            {/* <span>₹{(quotation.transportcharge || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span> */}
+            {!editTransport ? (
+              <>
+                <div className="d-flex align-items-center">
+                  <Button variant="link" size="sm" onClick={() => setEditTransport(true)}>
+                    <FaEdit />
+                  </Button>
+                  <span className="">
+                    ₹{(quotation.transportcharge || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="d-flex align-items-center">
+                  <Form.Group controlId="transportation" style={{ width: "150px" }}>
+                    <Form.Control
+                      type="number"
+                      value={quotation.transportcharge}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value) || 0;
+                        setQuotation({ ...quotation, transportcharge: value });
+                        // Update total calculations
+                        // quotation.refurbishment = value;
+                      }}
+                      min="0"
+                      step="0.01"
+                    />
+                  </Form.Group>
+                  <Button variant="primary" size="sm" className="ms-2" onClick={() => {
+                    setQuotation({ ...quotation, transportcharge: quotation.transportcharge });
+                    setEditTransport(false)
+                  }}>
+                    Save
+                  </Button>
+                  <Button variant="secondary" size="sm" className="ms-2" onClick={() => {
+                    // Reset to original value
+                    setQuotation(prev => ({ ...prev, transportcharge: prev.transportcharge }));
+                    setEditTransport(false);
+                  }}>
+                    Cancel
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
           <div className="d-flex justify-content-between mb-2">
             <span>Manpower Charge:</span>
-            <span>₹{(quotation.labourecharge || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            {/* <span>₹{(quotation.labourecharge || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span> */}
+            {!editManPower ? (
+              <>
+                <div className="d-flex align-items-center">
+                  <Button variant="link" size="sm" onClick={() => setEditManPower(true)}>
+                    <FaEdit />
+                  </Button>
+                  <span className="">
+                    ₹{(quotation.labourecharge || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="d-flex align-items-center">
+                  <Form.Group controlId="manpower" style={{ width: "150px" }}>
+                    <Form.Control
+                      type="number"
+                      value={quotation.labourecharge}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value) || 0;
+                        setQuotation({ ...quotation, labourecharge: value });
+                        // Update total calculations
+                        // quotation.refurbishment = value;
+                      }}
+                      min="0"
+                      step="0.01"
+                    />
+                  </Form.Group>
+                  <Button variant="primary" size="sm" className="ms-2" onClick={() => {
+                    setQuotation({ ...quotation, labourecharge: quotation.labourecharge });
+                    setEditManPower(false)
+                  }}>
+                    Save
+                  </Button>
+                  <Button variant="secondary" size="sm" className="ms-2" onClick={() => {
+                    // Reset to original value
+                    setQuotation(prev => ({ ...prev, labourecharge: prev.labourecharge }));
+                    setEditManPower(false);
+                  }}>
+                    Cancel
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
           <div className="d-flex justify-content-between mb-2">
             <span>Refurbishment:</span>

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Container, Row, Col, Table, Button } from "react-bootstrap";
 import logo from "../../assets/theweddingrentals.jpg";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { ApiURL, ImageApiURL } from "../../api";
 import html2pdf from "html2pdf.js";
 
@@ -15,22 +15,27 @@ const parseDate = (str) => {
 
 const Invoice = () => {
   const { id } = useParams();
+  const location = useLocation();
   const [order, setOrder] = useState(null); // Order state
   const [productDays, setProductDays] = useState({}); // State for storing days for each product
   const invoiceRef = useRef(); // Ref for the invoice element to capture
+  console.log(`location: `, location.state);
+  const grandTotal = location.state.grandTotal
 
   useEffect(() => {
-    fetchOrderDetails(); // Fetch order details when component mounts
-  }, [id]);
+    if (location.state?.orderData) {
+      setOrder(location.state.orderData);
+    } else {
+      fetchOrderDetails();
+    }
+  }, [location.state, id]);
 
   const fetchOrderDetails = async () => {
     try {
-      const res = await axios.get(`${ApiURL}/order/getOrder/${id}`);
-      if (res.status === 200) {
-        setOrder(res.data.order); // Set the order state with fetched data
-      }
+      const res = await axios.get(`${ApiURL}/order/getOrderDetails/${id}`);
+      setOrder(res.data);
     } catch (error) {
-      console.error("Error fetching order details:", error);
+      console.error("Error fetching order data:", error);
     }
   };
 
@@ -56,20 +61,20 @@ const Invoice = () => {
 
   if (!order) return <div>Loading invoice...</div>; // Ensure order is set before rendering the invoice
 
-  // Destructure product details from order
+  // // Destructure product details from order
   const items = order.slots.flatMap((slot) => slot.products) || [];
-  // order.discount = 0
-  // order.GST = 0
-  // order.refurbishment = 0
+  // // order.discount = 0
+  // // order.GST = 0
+  // // order.refurbishment = 0
 
   const discount = Number(order?.discount || 0);
-  // const discount = 0
+  // // const discount = 0
   const transport = Number(order?.transportcharge || 0);
   const manpower = Number(order?.labourecharge || 0);
   const gst = Number(order?.GST || 0);
   const refurbishment = Number(order?.refurbishmentAmount || 0);
-  
-  // Calculate totals
+
+  // // Calculate totals
   const subtotal = items.reduce((sum, item) => {
     const days = productDays[item.productId] || 1; // Get days for each product
     return sum + (item.total || 0); // Multiply total by days for each product
@@ -79,8 +84,8 @@ const Invoice = () => {
   const totalBeforeCharges = subtotal - discountAmt;
   const totalAfterCharges = totalBeforeCharges + manpower + transport + refurbishment;
   const gstAmt = (totalAfterCharges * gst) / 100;
-  const grandTotal = totalAfterCharges + gstAmt;
-  const roundOff = Number(order?.roundOff || grandTotal);
+  // const grandTotal = totalAfterCharges + gstAmt;
+  const roundOff = Number(order?.roundOff || 0);
 
   const invoice = {
     invoiceNo: order.invoiceId || "-",
@@ -160,7 +165,7 @@ const Invoice = () => {
           <p>Sy No </p>
           <p>Bettahalasur, Bangalore, Karnataka - 560001</p>
           <p>Tel: +91 xxxxxxxxxx</p>
-          <p>GSTIN: 29ABJFR2437E1Z3</p>
+          <p>GSTIN: xxxxxxxxxx</p>
         </Col>
       </Row>
 
@@ -292,12 +297,12 @@ const Invoice = () => {
                 <td className="text-center">{item.productSlot || "-"}</td>
                 <td>{item.productName || "-"}</td>
                 <td>
-                  {/* <img
+                  <img
                     src={`${ImageApiURL}/product/${item.ProductIcon}`}
                     alt={item.productName}
                     style={{ width: "50px", height: "50px" }}
                     crossOrigin="anonymous"
-                  /> */}
+                  />
                 </td>
                 <td className="text-center">998596</td>
                 <td className="text-center">{item.quantity || "-"}</td>
@@ -361,7 +366,7 @@ const Invoice = () => {
               <b>Grand Total</b>
             </td>
             <td>
-              <b>₹ {grandTotal.toFixed(2)}</b>
+              <b>₹ {grandTotal?.toFixed(2)}</b>
             </td>
           </tr>
           <tr className="bg-primary text-white">
@@ -370,6 +375,14 @@ const Invoice = () => {
             </td>
             <td>
               <b>₹ {roundOff.toFixed(2)}</b>
+            </td>
+          </tr>
+          <tr className="bg-primary text-white">
+            <td>
+              <b>Net Total</b>
+            </td>
+            <td>
+              <b>₹ {(grandTotal - roundOff).toFixed(2)}</b>
             </td>
           </tr>
         </tbody>

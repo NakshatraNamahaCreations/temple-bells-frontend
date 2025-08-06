@@ -106,7 +106,7 @@ const AddProduct = () => {
           repairCount: p.repairCount || 0,
         });
         if (p.ProductIcon) {
-          // setIconPreview(`${ImageApiURL}/product/${p.ProductIcon}`);
+          setIconPreview(`${ImageApiURL}/product/${p.ProductIcon}`);
         }
       }
     } catch (error) {

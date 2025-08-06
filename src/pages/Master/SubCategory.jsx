@@ -296,7 +296,7 @@ const SubCategory = () => {
                   <td className="text-start">{subCategory.subcategory}</td>
                   <td className="text-start">{subCategory.category}</td>
                   <td className="text-start">
-                    {/* {subCategory.subcatimg ? (
+                    {subCategory.subcatimg ? (
                       <img
                         src={`${ImageApiURL}/subcategory/${subCategory.subcatimg}`}
                         alt={subCategory.subcategory}
@@ -309,7 +309,7 @@ const SubCategory = () => {
                       />
                     ) : (
                       "No Image"
-                    )} */}
+                    )}
                   </td>
                   <td className="text-center">
                     <Button

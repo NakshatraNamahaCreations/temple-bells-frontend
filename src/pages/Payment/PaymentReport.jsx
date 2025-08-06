@@ -233,7 +233,7 @@ const PaymentReport = () => {
                 <th>Payment Date</th>
                 {/* <th>Payment ID</th> */}
                 <th>Company name</th>
-                {/* <th>Quotation ID</th> */}
+                <th>Quotation ID</th>
                 <th>Grand Total</th>
                 <th>Advance Amount</th>
                 <th>Payment Mode</th>
@@ -260,11 +260,11 @@ const PaymentReport = () => {
                     </td>
                     {/* <td style={{ fontSize: "12px" }}>{id}</td> */}
                     <td style={{ fontSize: "12px" }}>{payment?.companyName}</td>
-                    {/* <td style={{ fontSize: "12px" }}>
+                    <td style={{ fontSize: "12px" }}>
                       {payment.quotationId?.quoteId ||
                         payment.quotationId ||
                         "N/A"}
-                    </td> */}
+                    </td>
                     <td style={{ fontSize: "12px" }}>
                       {payment.totalAmount || payment.grandTotal}
                     </td>

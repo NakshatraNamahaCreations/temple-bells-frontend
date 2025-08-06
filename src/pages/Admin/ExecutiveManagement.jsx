@@ -8,7 +8,7 @@ import { Button } from "../../components/ui/Button";
 import { toast } from "react-toastify";
 import { ApiURL } from "../../api.js";
 
-const AdminRights = () => {
+const ExecutiveManagement = () => {
   const [selected, setSelected] = useState(0);
   const [displayname, setDisplayName] = useState("");
   const [contactno, setContactNo] = useState("");
@@ -22,7 +22,7 @@ const AdminRights = () => {
 
   useEffect(() => {
     console.log(`admin rights `);
-    getuser();
+    getAllExecutives();
   }, []);
 
   useEffect(() => {
@@ -40,12 +40,12 @@ const AdminRights = () => {
     }
   }, [search, userdata]);
 
-  const getuser = async () => {
+  const getAllExecutives = async () => {
     try {
       const token = sessionStorage.getItem("token");
       console.log(`token: ${token}`);
 
-      const res = await axios.get(`${ApiURL}/admins-list`, {
+      const res = await axios.get(`${ApiURL}/executive`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -90,7 +90,7 @@ const AdminRights = () => {
       if (data) {
         // Edit existing user
         const res = await axios.put(
-          `${ApiURL}/auth/users/${data.id}`,
+          `${ApiURL}/executive/${data.id}`,
           payload
         );
         if (res.status === 200) {
@@ -98,18 +98,24 @@ const AdminRights = () => {
           clearForm();
           setSelected(0);
           setData(null);
-          getuser();
+          getAllExecutives();
         }
-      } else {
-        // Register new user
-        const res = await axios.post(`${ApiURL}/auth/register`,
-          payload
+      } else {        
+        const token = sessionStorage.getItem("token");
+        const res = await axios.post(
+          `${ApiURL}/executive`,
+          payload,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         if (res.status === 201) {
           toast.success("✅ User registered successfully");
           clearForm();
           setSelected(0);
-          getuser();
+          getAllExecutives();
         }
       }
     } catch (error) {
@@ -123,7 +129,7 @@ const AdminRights = () => {
     try {
       await axios.delete(`${ApiURL}/auth/users/${id}`);
       toast.success("✅ User deleted successfully");
-      getuser();
+      getAllExecutives();
     } catch (error) {
       console.error("Error deleting user", error);
     }
@@ -146,13 +152,13 @@ const AdminRights = () => {
           className={`btn ${selected === 1 ? "btn-danger" : "btn-outline-secondary"}`}
           onClick={() => setSelected(1)}
         >
-          Add User
+          Add Executive
         </button>
         <button
           className={`btn ${selected === 0 ? "btn-danger" : "btn-outline-secondary"}`}
           onClick={() => setSelected(0)}
         >
-          View Users
+          View Executives
         </button>
       </div>
 
@@ -228,7 +234,7 @@ const AdminRights = () => {
                 {filterdata.length === 0 && (
                   <tr>
                     <td colSpan="5" className="text-center text-muted py-3">
-                      No users found.
+                      No executives found.
                     </td>
                   </tr>
                 )}
@@ -285,7 +291,7 @@ const AdminRights = () => {
             </div>
           </form>
           <button className="btn btn-success mt-4" onClick={registerUser}>
-            {data ? "Update User" : "Register User"}
+            {data ? "Update Executive" : "Register Executive"}
           </button>
         </div>
       )}
@@ -294,4 +300,4 @@ const AdminRights = () => {
 
 };
 
-export default AdminRights;
+export default ExecutiveManagement;

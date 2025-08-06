@@ -37,6 +37,7 @@ import Reports from "./pages/reports/Reports";
 import DamagedProductList from "./pages/Product/DamagedProductList.jsx";
 import AdminRights from "./pages/Admin/AdminRights.jsx";
 import AdminDetails from "./pages/Admin/AdminDetails.jsx";
+import ExecutiveManagement from "./pages/Admin/ExecutiveManagement.jsx";
 
 function App() {
   // Use state to trigger re-render on login/logout
@@ -84,6 +85,7 @@ function App() {
             {/* <Route path="/" element={<Dashboard />} /> */}
             <Route path="/admin-rights" element={<AdminRights />} />
             <Route path="/admin-details/:id" element={<AdminDetails />} />
+            {/* <Route path="/executive-management" element={<ExecutiveManagement />} /> */}
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/master" element={<Master />} />
             <Route path="/banner" element={<Banner />} />
@@ -113,7 +115,7 @@ function App() {
             <Route path="/damaged-products" element={<DamagedProductList />} />
             {/* Redirect /login to dashboard if already logged in */}
             <Route path="/login" element={<Navigate to="/" />} />
-            <Route path="/quotation/invoice/:id" element={<QuotationInvoice/>} />
+            <Route path="/quotation/invoice/:id" element={<QuotationInvoice />} />
           </Routes>
         </Layout>
       ) : (

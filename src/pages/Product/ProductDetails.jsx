@@ -230,7 +230,7 @@ const ProductDetails = () => {
         <Card.Body className="p-4">
           <Row>
             <Col md={4} className="text-center mb-4 mb-md-0">
-              {/* <img
+              <img
                 // src={`${ImageApiURL}product/${product.ProductIcon}`}
                 src={`${ImageApiURL}/product/${product.ProductIcon}`}
                 alt={product.ProductName}
@@ -241,7 +241,7 @@ const ProductDetails = () => {
                   borderRadius: "8px",
                   border: "1px solid #e0e0e0",
                 }}
-              /> */}
+              />
             </Col>
             <Col md={8}>
               <Row className="mb-2">

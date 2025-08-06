@@ -14,18 +14,40 @@ import { ApiURL } from "../../api";
 import { useNavigate } from "react-router-dom";
 
 const AddClient = () => {
+  // const randomNum = Math.floor(Math.random() * 1000);
+  // const randomPhone = Math.floor(Math.random() * 10000000000);
+  // const navigate = useNavigate();
+  // const [client, setClient] = useState({
+  //   companyName: `Company name ${randomNum}`,
+  //   contactPersonNumber: `${randomPhone}`,
+  //   email: `${randomNum}@example.com`,
+  //   address: "addr",
+  //   username: `username${randomNum}`,
+  //   password: `pwd${randomNum}`,
+  // });
+
+  // // const [executives, setExecutives] = useState([{ name: "", phone: "" }]);
+  // const [executives, setExecutives] = useState([{ name: `exec ${randomNum}`, phone: `${randomPhone}` }]);
+  // const [successMessage, setSuccessMessage] = useState("");
+  // const [errorMessage, setErrorMessage] = useState("");
+  // const [phoneErrors, setPhoneErrors] = useState([]);
+  // const [clientPhoneErrors, setClientPhoneErrors] = useState("");
+  
   const navigate = useNavigate();
   const [client, setClient] = useState({
     companyName: "",
     contactPersonNumber: "",
     email: "",
     address: "",
+    username: "",
+    password: "",
   });
 
-  const [executives, setExecutives] = useState([{ name: "", phone: "" }]);
+  const [executives, setExecutives] = useState([{ name: "", phone: "" }]);  
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [phoneErrors, setPhoneErrors] = useState([]);
+  const [clientPhoneErrors, setClientPhoneErrors] = useState("");
 
   // Phone number validation function
   const validatePhone = (phone) => {
@@ -42,9 +64,20 @@ const AddClient = () => {
     if (isValid) {
       currentErrors[index] = null;
     } else {
-      currentErrors[index] = "Phone number must be exactly 10 digits & must start with 6-9";
+      currentErrors[index] = "Phone number must be 10 digits and begin with 6–9 (e.g., 9876543210).";
     }
     setPhoneErrors(currentErrors);
+    return isValid;
+  };
+
+  const validateClientPhone = (phone) => {
+    const phoneRegex = /^[6-9]\d{9}$/;
+    const isValid = phoneRegex.test(phone);
+    if (!isValid) {
+      setClientPhoneErrors("Phone number must be 10 digits and begin with 6–9 (e.g., 9876543210).");
+    } else {
+      setClientPhoneErrors("");
+    }
     return isValid;
   };
 
@@ -79,24 +112,28 @@ const AddClient = () => {
       return;
     }
 
-    // Validate all executive phone numbers
-    const invalidPhones = executives.filter((exec, index) => !validatePhone(exec.phone));
-    if (invalidPhones.length > 0) {
-      setErrorMessage("Invalid phone number(s) in executives");
-      return;
-    }
+    // // Validate all executive phone numbers
+    // const invalidPhones = executives.filter((exec, index) => !validatePhone(exec.phone));
+    // if (invalidPhones.length > 0) {
+    //   setErrorMessage("Invalid phone number(s) in executives");
+    //   return;
+    // }
 
     // Prepare data for API
     const payload = {
       clientName: client.companyName,
       phoneNumber: client.contactPersonNumber,
+      clientUsername: client.username,
+      clientPassword: client.password,
       email: client.email,
       address: client.address,
-      executives: executives.map((exec) => ({
-        name: exec.name,
-        phoneNumber: exec.phone,
-      })),
+      // executives: executives.map((exec) => ({
+      //   name: exec.name,
+      //   phoneNumber: exec.phone,
+      // })),
     };
+
+    // console.log(`payload: `, payload);
 
     try {
       const res = await axios.post(`${ApiURL}/client/addClients`, payload);
@@ -149,7 +186,7 @@ const AddClient = () => {
               />
             </Form.Group>
 
-            <Form.Group className="mb-4">
+            {/* <Form.Group className="mb-4">
               <Form.Label> Executives *</Form.Label>
               {executives.map((exec, index) => (
                 <Row key={index} className="mb-2 align-items-center">
@@ -208,10 +245,10 @@ const AddClient = () => {
                   Add Executive
                 </Button>
               </div>
-            </Form.Group>
+            </Form.Group> */}
 
             <Form.Group className="mb-3">
-              <Form.Label>📞 Contact Person Number </Form.Label>
+              <Form.Label>📞 Contact Person Number *</Form.Label>
               <Form.Control
                 type="tel"
                 name="contactPersonNumber"
@@ -219,11 +256,16 @@ const AddClient = () => {
                 onChange={(e) => {
                   const value = e.target.value;
                   handleClientChange(e);
-                  validatePhoneInput(value);
+                  validateClientPhone(value);
                 }}
-                // required
+                required
                 className="rounded-3 shadow-sm"
               />
+              {clientPhoneErrors && (
+                <Form.Text className="text-danger">
+                  {clientPhoneErrors}
+                </Form.Text>
+              )}
             </Form.Group>
 
             <Form.Group className="mb-3">
@@ -234,6 +276,18 @@ const AddClient = () => {
                 value={client.email}
                 onChange={handleClientChange}
                 className="rounded-3 shadow-sm"
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label> Password *</Form.Label>
+              <Form.Control
+                type="text"
+                name="password"
+                value={client.password}
+                onChange={handleClientChange}
+                required
+                className="rounded-3 shadow-sm mt-2"
               />
             </Form.Group>
 

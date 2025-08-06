@@ -153,7 +153,7 @@ const Sidebars = () => {
 
       <ul className="nav flex-column mt-2">
         {console.log(`useracess: `, userAccess)}
-        {(userAccess?.superAdmin === true ? menuItems : filtered).map((item, index) => (
+        {menuItems.map((item, index) => (
           <li key={index} className="nav-item my-1">
             <Link
               to={item.path}

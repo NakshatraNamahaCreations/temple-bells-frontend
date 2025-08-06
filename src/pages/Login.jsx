@@ -13,7 +13,7 @@ const Login = ({ handleLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const ApiURL = "http://localhost:8077/api/master";
+  const ApiURL = "https://api.theweddingrentals.in/api/master";
 
   const handleSubmit = async (e) => {
     e.preventDefault();

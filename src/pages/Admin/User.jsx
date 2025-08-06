@@ -13,7 +13,7 @@ function User() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const ApiURL = "http://localhost:8077/api/master";
+  const ApiURL = "https://api.theweddingrentals.in/api/master";
 
   const [updatedMember, setUpdatedMember] = useState({
     name: "",

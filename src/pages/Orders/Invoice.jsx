@@ -20,7 +20,7 @@ const Invoice = () => {
   const [productDays, setProductDays] = useState({}); // State for storing days for each product
   const invoiceRef = useRef(); // Ref for the invoice element to capture
   console.log(`location: `, location.state);
-  const grandTotal = location.state.grandTotal
+  const grandTotal = location.state.grandTotal;
 
   useEffect(() => {
     if (location.state?.orderData) {
@@ -39,7 +39,6 @@ const Invoice = () => {
     }
   };
 
-  // Parse and calculate the days for each product
   useEffect(() => {
     if (order?.slots) {
       const daysObj = {};
@@ -82,7 +81,8 @@ const Invoice = () => {
 
   const discountAmt = (subtotal * discount) / 100;
   const totalBeforeCharges = subtotal - discountAmt;
-  const totalAfterCharges = totalBeforeCharges + manpower + transport + refurbishment;
+  const totalAfterCharges =
+    totalBeforeCharges + manpower + transport + refurbishment;
   const gstAmt = (totalAfterCharges * gst) / 100;
   // const grandTotal = totalAfterCharges + gstAmt;
   const roundOff = Number(order?.roundOff || 0);
@@ -137,13 +137,17 @@ const Invoice = () => {
       filename: `${invoice.invoiceNo || "invoice"}.pdf`,
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true }, // useCORS is important!
-      jsPDF: { unit: "in", format: "letter", orientation: "portrait" }
+      jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
     };
     html2pdf().from(element).set(opt).save();
   };
 
   return (
-    <Container ref={invoiceRef} className="p-4 border" style={{ fontSize: "12px" }}>
+    <Container
+      ref={invoiceRef}
+      className="p-4 border"
+      style={{ fontSize: "12px" }}
+    >
       <Button
         onClick={handleDownloadPDF}
         variant="success"
@@ -154,7 +158,11 @@ const Invoice = () => {
 
       <Row className="mb-4">
         <Col md={3}>
-          <img src={logo} alt="The Wedding Rentals Logo" style={{ width: "100%" }} />
+          <img
+            src={logo}
+            alt="The Wedding Rentals Logo"
+            style={{ width: "100%" }}
+          />
         </Col>
         <Col
           md={9}
@@ -308,7 +316,7 @@ const Invoice = () => {
                 <td className="text-center">{item.quantity || "-"}</td>
                 <td className="text-center">₹{item.ProductPrice}</td>
                 <td className="text-center">{days}</td>
-                <td>₹{(item.total).toFixed(2)}</td>
+                <td>₹{item.total.toFixed(2)}</td>
               </tr>
             );
           })}
@@ -319,7 +327,11 @@ const Invoice = () => {
         <tbody>
           <tr>
             <td>
-              <b>{discount != 0 ? "Total Amount before discount" : "Total Amount"}</b>
+              <b>
+                {discount != 0
+                  ? "Total Amount before discount"
+                  : "Total Amount"}
+              </b>
             </td>
             <td>₹ {subtotal.toFixed(2)}</td>
           </tr>
@@ -331,12 +343,14 @@ const Invoice = () => {
               <td>₹ {discountAmt.toFixed(2)}</td>
             </tr>
           )}
-          {discount !== 0 && <tr>
-            <td>
-              <b>Total amount after discount</b>
-            </td>
-            <td>₹ {totalBeforeCharges.toFixed(2)}</td>
-          </tr>}
+          {discount !== 0 && (
+            <tr>
+              <td>
+                <b>Total amount after discount</b>
+              </td>
+              <td>₹ {totalBeforeCharges.toFixed(2)}</td>
+            </tr>
+          )}
           <tr>
             <td>
               <b>Labour Charges</b>

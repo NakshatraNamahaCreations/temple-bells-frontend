@@ -34,13 +34,14 @@ import DatePicker from "react-datepicker";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const parseDate = (str) => {
-  if (!str) return null;
-  const [day, month, year] = str.split("-");
-  return new Date(`${year}-${month}-${day}`);
+  // console.log("parseDate str error: ", str)
+  if (!str) return null; // If date is undefined or null, return null.
+  const [day, month, year] = str.split("-"); // Assuming date format is DD-MM-YYYY
+  return new Date(`${year}-${month}-${day}`); // Convert to YYYY-MM-DD format for JavaScript Date
 };
 
 const formatDateToDDMMYYYY = (date) => {
-  if (!date) return null;
+  if (!date) return null; // If date is null or undefined, return null.
   if (!(date instanceof Date) || isNaN(date)) {
     console.log("formatDateToDDMMYYYY date:", date);
     return null;
@@ -107,7 +108,6 @@ const QuotationDetails = () => {
       setLoading(true);
       try {
         const res = await axios.get(`${ApiURL}/quotations/getquotation/${id}`);
-        console.log("fetrched qt:", res.data);
         console.log("getquotation/ quoteData: ", res.data.quoteData);
         // console.log("quoteData slots", res.data.quoteData.slots)
         setQuotation(res.data.quoteData);
@@ -139,13 +139,27 @@ const QuotationDetails = () => {
         });
       }
 
-      console.log("quotation?.slots", quotation?.slots);
-
       const updatedItems =
+        // quotation?.slots && Array.isArray(quotation.slots)
+        //   ? quotation.slots.flatMap((slot) =>
+        //       (slot.Products || []).map((prod) => {
+        //         let days = 1;
+        //         const quoteDate = prod.productQuoteDate || slot.quoteDate;
+        //         const endDate = prod.productEndDate || slot.endDate;
+
+        //         if (quoteDate && endDate) {
+        //           const start =
+        //             quoteDate instanceof Date
+        //               ? quoteDate
+        //               : parseDate(quoteDate);
+        //           const end =
+        //             endDate instanceof Date ? endDate : parseDate(endDate);
+        //           days = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+        //           if (isNaN(days) || days < 1) days = 1;
+        //         }
         quotation?.slots && Array.isArray(quotation.slots)
           ? quotation.slots.flatMap((slot) =>
               (slot.Products || []).map((prod) => {
-                console.log("slot.Products", slot.Products);
                 let days = 1;
                 const quoteDate = prod.productQuoteDate || slot.quoteDate;
                 const endDate = prod.productEndDate || slot.endDate;
@@ -210,7 +224,6 @@ const QuotationDetails = () => {
           paymentData.status === "Offline" ? "cash" : paymentData.mode,
         comment: paymentData.comments,
         status: "Completed",
-        initialadvamount: totaladvace,
       };
 
       // Make the POST request to add payment
@@ -269,7 +282,7 @@ const QuotationDetails = () => {
                 price: product.price,
                 quantity: product.quantity || product.qty,
                 total: product.total,
-                StockAvailable: product.availableStock,
+                StockAvailable: product.availableStock, // if needed
               })) || [],
           })) || [],
       };
@@ -340,7 +353,6 @@ const QuotationDetails = () => {
             slotName: slot.slotName,
             quoteDate: slot.quoteDate,
             endDate: slot.endDate,
-
             // products: slot.Products?.map((product) => ({
             //   productId: product.productId,
             //   productName: product.productName,
@@ -369,7 +381,7 @@ const QuotationDetails = () => {
 
             products: slot.Products?.map((product) => {
               console.log("productData: ", productDates);
-              const productData = productDates[product.productId];
+              const productData = productDates[product.productId]; // Find corresponding data from x
               console.log(
                 "product.productId: ",
                 product.productId,
@@ -392,7 +404,6 @@ const QuotationDetails = () => {
                   formatDateToDDMMYYYY(productData?.productEndDate) ||
                   quotation.endDate,
                 productSlot: productData?.productSlot || quotation.quoteTime,
-                initialAdvamount: product?.Advanceamount,
               };
             }),
           })) || [], // Default to empty array if no slots found
@@ -1059,13 +1070,6 @@ const QuotationDetails = () => {
     );
   }
 
-  const totaladvace = (quotation.allProductsTotal = items.reduce(
-    (sum, item) => sum + (item.Advanceamount || 0) * item.units,
-    0
-  ));
-
-  console.log("totaladvace", totaladvace);
-
   return (
     <Container className="my-5" style={{ fontFamily: "'Roboto', sans-serif" }}>
       {/* Header with Logo and Title */}
@@ -1210,9 +1214,7 @@ const QuotationDetails = () => {
                 <th>Qty</th>
                 <th>Days</th>
                 <th>Price/Qty</th>
-
                 <th>Total</th>
-                <th>Adv</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -1456,9 +1458,6 @@ const QuotationDetails = () => {
                       })} */}
                     </td>
                     <td style={{ padding: "12px", verticalAlign: "middle" }}>
-                      ₹{item.Advanceamount * item.units}
-                    </td>
-                    <td style={{ padding: "12px", verticalAlign: "middle" }}>
                       {editIdx === idx ? (
                         <>
                           <Button
@@ -1555,20 +1554,6 @@ const QuotationDetails = () => {
               Add discount
             </Button>
           )}
-
-          <div
-            className="d-flex justify-content-between mb-2"
-            style={{ fontSize: "14px", fontWeight: "700", color: "#34495e" }}
-          >
-            <span>Total Advance Amount:</span>
-            {/* <span>
-              ₹
-              {(quotation.GrandTotal || quotation.grandTotal || 0).toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-              })}
-            </span> */}
-            <span>₹ {totaladvace}</span>
-          </div>
 
           {/* <div className="d-flex justify-content-between mb-2">
             <span style={{ fontWeight: "600" }}>Products Total:</span>
@@ -1674,7 +1659,6 @@ const QuotationDetails = () => {
               )}
             </div>
           )}
-
           {(quotation?.discount != 0 || editDiscount) && (
             <div
               className="d-flex justify-content-between mb-2"
@@ -1689,7 +1673,6 @@ const QuotationDetails = () => {
               </span>
             </div>
           )}
-
           <div className="d-flex justify-content-between mb-2">
             <span>Transportation:</span>
             {/* <span>₹{(quotation.transportcharge || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span> */}

@@ -124,7 +124,7 @@ const AddNewEnquiry = () => {
   };
 
   const fetchProducts = async () => {
-    try { 
+    try {
       const res = await axios.get(`${ApiURL}/product/quoteproducts`);
       if (res.status === 200) {
         setAllProducts(res.data.QuoteProduct);
@@ -133,6 +133,8 @@ const AddNewEnquiry = () => {
       console.error("Error fetching products:", error);
     }
   };
+
+  console.log("allProducts", allProducts);
 
   const handleSubcategorySelection = (e) => {
     const subcategory = e.target.value;
@@ -194,10 +196,10 @@ const AddNewEnquiry = () => {
       prev.map((p) =>
         p.id === id || p._id === id
           ? {
-            ...p,
-            qty: val,  // Directly set the value entered by the user
-            total: (parseFloat(val) || 0) * (p.ProductPrice || p.price), // Use parseFloat to handle decimals if needed
-          }
+              ...p,
+              qty: val, // Directly set the value entered by the user
+              total: (parseFloat(val) || 0) * (p.ProductPrice || p.price), // Use parseFloat to handle decimals if needed
+            }
           : p
       )
     );
@@ -232,6 +234,7 @@ const AddNewEnquiry = () => {
       qty: p.qty,
       price: p.ProductPrice || p.price,
       total: (parseInt(p.qty, 10) || 1) * (p.ProductPrice || p.price),
+      Advanceamount: p.Advanceamount,
     }));
 
     const clientId = clientData.find((c) => c.clientName === company)?._id;
@@ -488,8 +491,8 @@ const AddNewEnquiry = () => {
                                 p.img
                                   ? p.img
                                   : p.ProductIcon
-                                    ? `${ImageApiURL}/product/${p.ProductIcon}`
-                                    : "https://via.placeholder.com/36x28?text=No+Img"
+                                  ? `${ImageApiURL}/product/${p.ProductIcon}`
+                                  : "https://via.placeholder.com/36x28?text=No+Img"
                               }
                               alt={p.name || p.ProductName}
                               style={{
@@ -558,8 +561,11 @@ const AddNewEnquiry = () => {
                               }}
                             >
                               {filteredProducts
-                                .filter(prod =>
-                                  prod.ProductName.toLowerCase().includes(productSearch.toLowerCase()))
+                                .filter((prod) =>
+                                  prod.ProductName.toLowerCase().includes(
+                                    productSearch.toLowerCase()
+                                  )
+                                )
                                 .map((prod) => (
                                   <div
                                     key={prod.id || prod._id}
@@ -614,6 +620,7 @@ const AddNewEnquiry = () => {
                         <th>Stock</th>
                         <th>Quantity</th>
                         <th>Price</th>
+                        <th>Advance amount</th>
                         <th>Total</th>
                         <th>Remove</th>
                       </tr>
@@ -636,6 +643,9 @@ const AddNewEnquiry = () => {
                               />
                             </td>
                             <td>₹{p.ProductPrice}</td>
+                            <td>
+                              ₹{p.Advanceamount * (parseInt(p.qty, 10) || 1)}
+                            </td>
                             <td>
                               ₹{(parseInt(p.qty, 10) || 1) * p.ProductPrice}
                             </td>

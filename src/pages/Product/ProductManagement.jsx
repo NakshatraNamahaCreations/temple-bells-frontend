@@ -10,7 +10,7 @@ import { MdVisibility } from "react-icons/md";
 const ProductManagement = () => {
   const navigate = useNavigate();
   // Load initial search state from localStorage
-  const savedSearch = localStorage.getItem('productSearchQuery') || "";
+  const savedSearch = localStorage.getItem("productSearchQuery") || "";
   const [searchQuery, setSearchQuery] = useState(savedSearch);
   const [selectedRows, setSelectedRows] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,24 +40,32 @@ const ProductManagement = () => {
 
   useEffect(() => {
     // Save search query to localStorage
-    localStorage.setItem('productSearchQuery', searchQuery);
+    localStorage.setItem("productSearchQuery", searchQuery);
 
     const filtered = products.filter((product) => {
       // Split the search query into words
-      const searchWords = searchQuery.toLowerCase().split(' ').filter(word => word.trim());
+      const searchWords = searchQuery
+        .toLowerCase()
+        .split(" ")
+        .filter((word) => word.trim());
       // Split product name into words
-      const productWords = product.ProductName.toLowerCase().split(' ');
-      const productWordsDesc = product.ProductDesc.toLowerCase().split(' ');
+      const productWords = product.ProductName.toLowerCase().split(" ");
+      const productWordsDesc = product.ProductDesc.toLowerCase().split(" ");
 
       // Check if all search words match either:
       // 1. As complete words, or
       // 2. As partial matches at the start of words
-      return searchWords.every(searchWord =>
-        productWords.some(productWord =>
-          productWord === searchWord || productWord.startsWith(searchWord)
-        ) || productWordsDesc.some(productWordDesc =>
-          productWordDesc === searchWord || productWordDesc.startsWith(searchWord)
-        )
+      return searchWords.every(
+        (searchWord) =>
+          productWords.some(
+            (productWord) =>
+              productWord === searchWord || productWord.startsWith(searchWord)
+          ) ||
+          productWordsDesc.some(
+            (productWordDesc) =>
+              productWordDesc === searchWord ||
+              productWordDesc.startsWith(searchWord)
+          )
       );
     });
     setFilteredProducts(filtered);
@@ -66,13 +74,15 @@ const ProductManagement = () => {
     return () => {
       console.log("cleanup func: ", location.pathname);
       // Only clear search state when navigating away to a different module
-      if (location.pathname !== '/product-management' &&
-        !location.pathname.startsWith('/product-details/') &&
-        !location.pathname.startsWith('/edit-product/')) {
+      if (
+        location.pathname !== "/product-management" &&
+        !location.pathname.startsWith("/product-details/") &&
+        !location.pathname.startsWith("/edit-product/")
+      ) {
         console.log("clearing search state: ", location.pathname);
 
         setSearchQuery("");
-        localStorage.removeItem('productSearchQuery');
+        localStorage.removeItem("productSearchQuery");
       }
     };
   }, [searchQuery, products]);
@@ -231,10 +241,13 @@ const ProductManagement = () => {
                 <th className="text-start" style={{ width: "10%" }}>
                   Pricing
                 </th>
-                <th className="text-start" style={{ width: "10%" }}>
+                {/* <th className="text-start" style={{ width: "10%" }}>
                   Seater
-                </th>
+                </th> */}
                 <th className="text-start" style={{ width: "10%" }}>
+                  A.amount
+                </th>
+                <th className="text-start" style={{ width: "13%" }}>
                   Material
                 </th>
                 {/* <th className="text-start" style={{ width: "10%" }}>
@@ -282,14 +295,15 @@ const ProductManagement = () => {
                     {product.ProductPrice}
                   </td>
                   <td className="text-start" style={{ fontSize: "12px" }}>
-                    {product.seater ? product.seater : "N/A"}
+                    {product.Advanceamount}
                   </td>
+                  {/* <td className="text-start" style={{ fontSize: "12px" }}>
+                    {product.seater ? product.seater : "N/A"}
+                  </td> */}
                   <td className="text-start" style={{ fontSize: "12px" }}>
                     {product.Material ? product.Material : "N/A"}
                   </td>
-                  {/* <td className="text-start" style={{ fontSize: "12px" }}>
-                    {product.ProductDesc}
-                  </td> */}
+
                   <td className="">
                     <Button
                       variant="outline-dark"

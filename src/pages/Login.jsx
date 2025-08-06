@@ -1,10 +1,9 @@
-
 import React, { useState } from "react";
 import { Form, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
-import { ApiURL } from "../api";
+// import { ApiURL } from "../api";
 import logo from "../assets/theweddingrentals.jpg";
 
 const Login = ({ handleLogin }) => {
@@ -14,6 +13,8 @@ const Login = ({ handleLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const ApiURL = "http://localhost:8077/api/master";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !password) {
@@ -21,27 +22,23 @@ const Login = ({ handleLogin }) => {
       return;
     }
 
-    setLoading(true);
     try {
-      const response = await axios.post(`${ApiURL}/adminLogin`, {
+      const response = await axios.post(`${ApiURL}/loginteammember`, {
         email,
         password,
       });
       if (response.status === 200) {
         toast.success("Login successful");
-        sessionStorage.setItem("token", response.data.token);
-        console.log(`permissions: `, response.data.permissions);
-        sessionStorage.setItem("permissions", JSON.stringify(response.data.permissions));
-        console.log(`sessionStorage.getItem("permissions"): `, sessionStorage.getItem("permissions"));
-        handleLogin && handleLogin(response.data.permissions);
+        const userData = response.data.user;
+
+        localStorage.setItem("user", JSON.stringify(userData));
         navigate("/dashboard");
-      } else {
-        toast.error("Login failed");
+        console.log("Stored user data:", userData);
       }
     } catch (error) {
-      toast.error("Invalid credentials or server error");
-    } finally {
-      setLoading(false);
+      const errorMsg =
+        error.response?.data?.message || "Invalid credentials or server error";
+      toast.error(errorMsg);
     }
   };
 
@@ -50,7 +47,6 @@ const Login = ({ handleLogin }) => {
       style={{
         minHeight: "100vh",
         background: "#f6f6f6",
-        // background: "#323D4F",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -88,7 +84,7 @@ const Login = ({ handleLogin }) => {
               width: "60px",
               marginBottom: "18px",
               marginLeft: "-6px",
-              marginInline: "auto"
+              marginInline: "auto",
             }}
           />
           <h3 style={{ fontWeight: 700, color: "#222", marginBottom: "30px" }}>
@@ -150,24 +146,39 @@ const Login = ({ handleLogin }) => {
                 >
                   {showPassword ? (
                     <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
-                      <path stroke="#aaa" strokeWidth="2" d="M3 3l18 18M10.7 10.7A3 3 0 0012 15a3 3 0 002.12-5.12M9.88 9.88A3 3 0 0112 9a3 3 0 013 3c0 .53-.14 1.03-.38 1.46" />
-                      <path stroke="#aaa" strokeWidth="2" d="M2.46 12.12C4.6 7.94 8.06 5.5 12 5.5c2.04 0 3.97.64 5.54 1.74M21.54 12.12C19.4 16.3 15.94 18.74 12 18.74c-2.04 0-3.97-.64-5.54-1.74" />
+                      <path
+                        stroke="#aaa"
+                        strokeWidth="2"
+                        d="M3 3l18 18M10.7 10.7A3 3 0 0012 15a3 3 0 002.12-5.12M9.88 9.88A3 3 0 0112 9a3 3 0 013 3c0 .53-.14 1.03-.38 1.46"
+                      />
+                      <path
+                        stroke="#aaa"
+                        strokeWidth="2"
+                        d="M2.46 12.12C4.6 7.94 8.06 5.5 12 5.5c2.04 0 3.97.64 5.54 1.74M21.54 12.12C19.4 16.3 15.94 18.74 12 18.74c-2.04 0-3.97-.64-5.54-1.74"
+                      />
                     </svg>
                   ) : (
                     <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
-                      <ellipse cx="12" cy="12" rx="9" ry="6" stroke="#aaa" strokeWidth="2" />
-                      <circle cx="12" cy="12" r="3" stroke="#aaa" strokeWidth="2" />
+                      <ellipse
+                        cx="12"
+                        cy="12"
+                        rx="9"
+                        ry="6"
+                        stroke="#aaa"
+                        strokeWidth="2"
+                      />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="3"
+                        stroke="#aaa"
+                        strokeWidth="2"
+                      />
                     </svg>
                   )}
                 </span>
               </div>
             </Form.Group>
-
-            {/* <div className="d-flex justify-content-between align-items-center mb-3">
-              <a href="#" style={{ fontSize: "13px", color: "#7c7c7c", textDecoration: "underline" }}>
-                Forgot Password
-              </a>
-            </div> */}
 
             <Button
               variant="dark"
@@ -182,7 +193,7 @@ const Login = ({ handleLogin }) => {
                 background: "#222",
                 border: "none",
                 letterSpacing: "1px",
-                marginTop: "10px"
+                marginTop: "10px",
               }}
             >
               {loading ? "Logging in..." : "LOG IN"}

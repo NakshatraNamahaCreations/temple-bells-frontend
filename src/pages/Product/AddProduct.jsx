@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState } from "react";
 import { Form, Button, Row, Col, Container, Card } from "react-bootstrap";
 import { FaUpload, FaDownload, FaPlus } from "react-icons/fa";
@@ -28,6 +26,7 @@ const AddProduct = () => {
     description: "",
     productIcon: null,
     repairCount: 0,
+    Advanceamount: "",
   });
 
   const [iconPreview, setIconPreview] = useState(null);
@@ -104,6 +103,7 @@ const AddProduct = () => {
           description: p.ProductDesc || "",
           productIcon: p.ProductIcon || null, // Use existing icon if available
           repairCount: p.repairCount || 0,
+          Advanceamount: p.Advanceamount || 0,
         });
         if (p.ProductIcon) {
           setIconPreview(`${ImageApiURL}/product/${p.ProductIcon}`);
@@ -232,6 +232,7 @@ const AddProduct = () => {
     formData.append("qty", productData.quantity);
     formData.append("minqty", productData.minQuantity);
     formData.append("repairCount", productData.repairCount); // <-- Add this line
+    formData.append("Advanceamount", productData.Advanceamount);
 
     // Only append icon if new file selected or adding
     if (productData.productIcon) {
@@ -289,6 +290,7 @@ const AddProduct = () => {
           description: "",
           productIcon: null,
           repairCount: "", // <-- Add this line
+          Advanceamount: "",
         });
         setIconPreview(null);
         setTimeout(() => navigate("/product-management"), 1000);
@@ -389,7 +391,7 @@ const AddProduct = () => {
             <Row className="mb-3">
               <Col md={4}>
                 <Form.Label style={{ fontSize: 14 }}>
-                  Available Stock 
+                  Available Stock
                   {/* <span className="text-danger">*</span> */}
                 </Form.Label>
                 <Form.Control
@@ -492,7 +494,7 @@ const AddProduct = () => {
 
             {/* Color + Material */}
             <Row className="mb-3">
-              <Col md={6}>
+              <Col md={4}>
                 <Form.Label style={{ fontSize: 14 }}>Color</Form.Label>
                 <Form.Control
                   type="text"
@@ -503,12 +505,23 @@ const AddProduct = () => {
                   style={{ fontSize: 14 }}
                 />
               </Col>
-              <Col md={6}>
+              <Col md={4}>
                 <Form.Label style={{ fontSize: 14 }}>Material</Form.Label>
                 <Form.Control
                   type="text"
                   name="material"
                   value={productData.material}
+                  onChange={handleChange}
+                  className="rounded-3 shadow-sm"
+                  style={{ fontSize: 14 }}
+                />
+              </Col>
+              <Col md={4}>
+                <Form.Label style={{ fontSize: 14 }}>Advance amount</Form.Label>
+                <Form.Control
+                  type="number"
+                  name="Advanceamount"
+                  value={productData.Advanceamount}
                   onChange={handleChange}
                   className="rounded-3 shadow-sm"
                   style={{ fontSize: 14 }}
@@ -551,20 +564,23 @@ const AddProduct = () => {
                 <FaUpload style={{ fontSize: "18px", color: "#323D4F" }} />
               </div>
               {(iconPreview ||
-                (isEditMode && !iconPreview && productData.productIcon === null && iconPreview !== null)) && (
-                  <div className="mt-3">
-                    <img
-                      src={iconPreview}
-                      alt="Preview"
-                      style={{
-                        width: "100px",
-                        height: "100px",
-                        borderRadius: "8px",
-                        objectFit: "cover",
-                      }}
-                    />
-                  </div>
-                )}
+                (isEditMode &&
+                  !iconPreview &&
+                  productData.productIcon === null &&
+                  iconPreview !== null)) && (
+                <div className="mt-3">
+                  <img
+                    src={iconPreview}
+                    alt="Preview"
+                    style={{
+                      width: "100px",
+                      height: "100px",
+                      borderRadius: "8px",
+                      objectFit: "cover",
+                    }}
+                  />
+                </div>
+              )}
             </Form.Group>
 
             {/* Add/Update Product Button */}
@@ -585,8 +601,8 @@ const AddProduct = () => {
                   ? "Updating..."
                   : "Adding..."
                 : isEditMode
-                  ? "Update Product"
-                  : "Add Product"}
+                ? "Update Product"
+                : "Add Product"}
             </Button>
 
             {/* Success Message */}

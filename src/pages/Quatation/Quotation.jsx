@@ -35,6 +35,8 @@ const Quotation = () => {
     setLoading(false);
   };
 
+  console.log("quotations", quotations);
+
   useEffect(() => {
     fetchQuotations();
   }, []);
@@ -228,8 +230,10 @@ const Quotation = () => {
                     <td className="text-start">{q.quoteTime}</td>
                     <td className="text-start">{q.clientName}</td>
                     <td className="text-start">{q.GST}</td>
-                    {/* <td className="text-start">{q.adjustments || q.roundOff}</td> */}
-                    <td className="text-start">{q.GrandTotal || q.grandTotal}</td>
+
+                    <td className="text-start">
+                      {q.GrandTotal || q.grandTotal}
+                    </td>
                     <td className="text-start">{q.status}</td>
                     <td className="">
                       <Button
@@ -429,7 +433,7 @@ export default Quotation;
 //           <p>Deleting the quotation...</p>
 //         </div>
 //       )}
-      
+
 //       <Card className="border-0 shadow-sm">
 //         <div
 //           className="table-responsive bg-white rounded-lg"

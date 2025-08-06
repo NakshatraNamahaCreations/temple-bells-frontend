@@ -90,8 +90,8 @@ const OrderDetails = () => {
     comments: "",
     date: new Date().toLocaleDateString("en-GB").split("/").join("-"),
   });
-  const [amountPaid, setAmountPaid] = useState(0)
-  const [amountPending, setAmountPending] = useState(0)
+  const [amountPaid, setAmountPaid] = useState(0);
+  const [amountPending, setAmountPending] = useState(0);
 
   // Add roundOff state
   const [roundOff, setRoundOff] = useState(0);
@@ -230,7 +230,10 @@ const OrderDetails = () => {
     try {
       const res = await axios.get(`${ApiURL}/order/getOrder/${id}`);
       console.log("fetchorder details: ", res.data.order);
-      console.log("fetchorder details products only: ", res.data.order.slots[0].products);
+      console.log(
+        "fetchorder details products only: ",
+        res.data.order.slots[0].products
+      );
       if (res.status === 200) {
         setOrder(res.data.order); // <-- Make sure your backend returns the order details
       }
@@ -238,6 +241,8 @@ const OrderDetails = () => {
       console.error("Error fetching order details:", error);
     }
   };
+
+  console.log("order", order);
 
   const fetchAllProducts = async () => {
     try {
@@ -556,7 +561,7 @@ const OrderDetails = () => {
       );
       const productEndDate = formatDateToDDMMYYYY(
         productDates[order.slots[0].products[idx].productId]?.productEndDate ||
-        order.slots[0].endDate
+          order.slots[0].endDate
       );
 
       const responseObj = {
@@ -595,10 +600,10 @@ const OrderDetails = () => {
           prev.map((prod, i) =>
             i === idx
               ? {
-                ...prod,
-                quantity: editQty, // Set the updated quantity
-                total: editQty * prod.unitPrice, // Recalculate the total based on the new quantity
-              }
+                  ...prod,
+                  quantity: editQty, // Set the updated quantity
+                  total: editQty * prod.unitPrice, // Recalculate the total based on the new quantity
+                }
               : prod
           )
         );
@@ -777,25 +782,29 @@ const OrderDetails = () => {
 
       if (quoteDate && endDate) {
         const start =
-          quoteDate instanceof Date
-            ? quoteDate
-            : parseDate(quoteDate);
-        const end =
-          endDate instanceof Date ? endDate : parseDate(endDate);
-        days =
-          Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+          quoteDate instanceof Date ? quoteDate : parseDate(quoteDate);
+        const end = endDate instanceof Date ? endDate : parseDate(endDate);
+        days = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
         if (isNaN(days) || days < 1) days = 1;
       }
 
       const price = prod.ProductPrice || 0;
       prod.days = days;
       prod.productTotal = price * days * prod.quantity;
-      console.log(`${prod.productName} productTotal: ${prod.productTotal}`)
+      console.log(`${prod.productName} productTotal: ${prod.productTotal}`);
 
-      if (idx === 0) console.log("date difference fr prod.prodname: ", prod.productName, days);
-    })
+      if (idx === 0)
+        console.log(
+          "date difference fr prod.prodname: ",
+          prod.productName,
+          days
+        );
+    });
 
-    const allProductsTotal = products.reduce((sum, prod) => sum + (prod.productTotal || 0), 0)
+    const allProductsTotal = products.reduce(
+      (sum, prod) => sum + (prod.productTotal || 0),
+      0
+    );
 
     // console.log("order.slots.prods: ", order.slots[0].products)
     // console.log("productTotal: ", productTotal)
@@ -810,11 +819,11 @@ const OrderDetails = () => {
     // const subtotal = productTotal + labour + transport - adjustments;
     const discountAmount = (allProductsTotal * discountPercent) / 100;
     const totalBeforeCharges = allProductsTotal - discountAmount;
-    const totalAfterCharges = totalBeforeCharges + labour + transport + refurbishmentAmount;
-    const gstAmount = ((totalAfterCharges) * gstPercent) / 100;
+    const totalAfterCharges =
+      totalBeforeCharges + labour + transport + refurbishmentAmount;
+    const gstAmount = (totalAfterCharges * gstPercent) / 100;
 
     // console.log("calc: ", subtotal - discountAmount + gstAmount)
-
 
     // console.log("allProductsTotal: ", allProductsTotal)
     // console.log("transport: ", transport)
@@ -833,19 +842,22 @@ const OrderDetails = () => {
   const grandTotal = order ? calculateGrandTotal(order) : 0;
 
   useEffect(() => {
-    const paid = order?.payments.reduce((acc, curr) => acc + curr?.advancedAmount, 0)
-    setAmountPaid(paid)
+    const paid = order?.payments.reduce(
+      (acc, curr) => acc + curr?.advancedAmount,
+      0
+    );
+    setAmountPaid(paid);
 
     if (order?.roundOff !== 0) {
       console.log(`order?.roundOff === 0: `, order?.roundOff);
-      const pending = grandTotal - order?.roundOff - paid
-      setAmountPending(pending)
+      const pending = grandTotal - order?.roundOff - paid;
+      setAmountPending(pending);
     } else {
       console.log(`order?.grandTotal === 0: `, grandTotal);
-      const pending = grandTotal - paid
-      setAmountPending(pending)
+      const pending = grandTotal - paid;
+      setAmountPending(pending);
     }
-  }, [order, grandTotal])
+  }, [order, grandTotal]);
 
   useEffect(() => {
     console.log("useeffect");
@@ -980,9 +992,9 @@ const OrderDetails = () => {
         toast.success("RoundOff updated successfully");
         setIsEditingRoundOff(false);
         // Update order state with new roundOff value
-        setOrder(prev => ({
+        setOrder((prev) => ({
           ...prev,
-          roundOff
+          roundOff,
         }));
       } else {
         toast.error("Failed to update roundOff");
@@ -1017,6 +1029,11 @@ const OrderDetails = () => {
     "Slot 3: 7:30 AM to 4:00 PM",
   ];
 
+  const totalInitialAdvance = products.reduce(
+    (sum, prod) => sum + (Number(prod.initialAdvamount) || 0) * prod.quantity,
+    0
+  );
+
   return (
     <div className="p-3" style={{ background: "#f6f8fa", minHeight: "100vh" }}>
       <div ref={pdfRef}>
@@ -1024,9 +1041,15 @@ const OrderDetails = () => {
           {/* <Button variant="secondary" onClick={handleDownloadPDF} style={{ width: "150px", margin: "10px" }}>
             Download PDF
           </Button> */}
-          {!pdfMode && <Button variant="secondary" onClick={handleDownloadPDF} style={{ width: "150px", margin: "10px" }}>
-            Download PDF
-          </Button>}
+          {!pdfMode && (
+            <Button
+              variant="secondary"
+              onClick={handleDownloadPDF}
+              style={{ width: "150px", margin: "10px" }}
+            >
+              Download PDF
+            </Button>
+          )}
           <Card.Body>
             <h6 className="mb-3" style={{ fontWeight: 700, fontSize: 17 }}>
               Order Details
@@ -1055,10 +1078,17 @@ const OrderDetails = () => {
                   <span style={valueStyle}>{order.placeaddress}</span>
                 </div>
                 {!pdfMode && (
-                  <div className="mb-1" style={{ display: "flex", gap: "10px" }}>
+                  <div
+                    className="mb-1"
+                    style={{ display: "flex", gap: "10px" }}
+                  >
                     <span style={labelStyle}>Order Status: </span>
                     <span
-                      style={{ ...valueStyle, color: "#1dbf73", fontWeight: 600 }}
+                      style={{
+                        ...valueStyle,
+                        color: "#1dbf73",
+                        fontWeight: 600,
+                      }}
                     >
                       {order.orderStatus}
                     </span>
@@ -1070,6 +1100,10 @@ const OrderDetails = () => {
                 <div className="mb-1" style={{ display: "flex", gap: "10px" }}>
                   <span style={labelStyle}>Venue address:</span>
                   <span style={valueStyle}>{order.Address}</span>
+                </div>
+                <div className="mb-1" style={{ display: "flex", gap: "10px" }}>
+                  <span style={labelStyle}>Initial Advance:</span>
+                  <span style={valueStyle}>₹{totalInitialAdvance}</span>
                 </div>
                 <div className="mb-1" style={{ display: "flex", gap: "10px" }}>
                   <span style={labelStyle}>Grand Total: </span>
@@ -1086,7 +1120,12 @@ const OrderDetails = () => {
                 </div> */}
                 <div
                   className="mb-1"
-                  style={{ display: "flex", gap: "10px", alignItems: "center", lineHeight: "1.2" }}
+                  style={{
+                    display: "flex",
+                    gap: "10px",
+                    alignItems: "center",
+                    lineHeight: "1.2",
+                  }}
                 >
                   <span style={labelStyle}>Roundoff:</span>
                   {!isEditingRoundOff ? (
@@ -1095,14 +1134,25 @@ const OrderDetails = () => {
                       <Button
                         variant="link"
                         size="sm"
-                        style={{ padding: "0", height: "20px", display: "flex", alignItems: "center" }}
+                        style={{
+                          padding: "0",
+                          height: "20px",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
                         onClick={() => setIsEditingRoundOff(true)}
                       >
                         <FaEdit style={{ fontSize: "14px", margin: "0" }} />
                       </Button>
                     </>
                   ) : (
-                    <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "8px",
+                        alignItems: "center",
+                      }}
+                    >
                       <Form.Control
                         type="number"
                         step="0.01"
@@ -1145,7 +1195,11 @@ const OrderDetails = () => {
                   <Button
                     variant="outline-success"
                     size="sm"
-                    style={{ fontSize: 12, padding: "2px 14px", marginRight: 8 }}
+                    style={{
+                      fontSize: 12,
+                      padding: "2px 14px",
+                      marginRight: 8,
+                    }}
                     onClick={handleShowAdd}
                     disabled={order && order.orderStatus === "cancelled"}
                   >
@@ -1163,7 +1217,6 @@ const OrderDetails = () => {
                 </div>
               )}
             </div>
-
 
             {/* products table */}
             <div className="table-responsive mb-3">
@@ -1235,7 +1288,7 @@ const OrderDetails = () => {
                                       "productQuoteDate",
                                       date,
                                       prod.productQuoteDate ||
-                                      order?.slots[0]?.quoteTime
+                                        order?.slots[0]?.quoteTime
                                     )
                                   }
                                   dateFormat="dd/MM/yyyy"
@@ -1246,7 +1299,10 @@ const OrderDetails = () => {
                                     order && order.orderStatus === "cancelled"
                                   }
                                 />
-                                {console.log("end date: ", productDates[prod.productId])}
+                                {console.log(
+                                  "end date: ",
+                                  productDates[prod.productId]
+                                )}
                                 <DatePicker
                                   selected={
                                     productDates[prod.productId]
@@ -1259,7 +1315,7 @@ const OrderDetails = () => {
                                       "productEndDate",
                                       date,
                                       prod.productEndDate ||
-                                      order?.slots[0]?.endTime
+                                        order?.slots[0]?.endTime
                                     )
                                   }
                                   dateFormat="dd/MM/yyyy"
@@ -1373,12 +1429,12 @@ const OrderDetails = () => {
                                   val === ""
                                     ? ""
                                     : Math.max(
-                                      1,
-                                      Math.min(
-                                        Number(val),
-                                        prod.availableStock + prod.quantity
+                                        1,
+                                        Math.min(
+                                          Number(val),
+                                          prod.availableStock + prod.quantity
+                                        )
                                       )
-                                    )
                                 );
                               }}
                               style={{
@@ -1393,7 +1449,7 @@ const OrderDetails = () => {
                           )}
                         </td>
                         <td>{prod.days}</td>
-                        <td>₹{(prod.ProductPrice)}</td>
+                        <td>₹{prod.ProductPrice}</td>
                         <td>₹{prod.productTotal}</td>
                         {/* {(idx === 0) && console.log(`prod.total * days: ${prod.total * days} prod.productName: ${prod.productName}prod.total: ${prod.total}`)} */}
                         {!pdfMode && (
@@ -1447,33 +1503,44 @@ const OrderDetails = () => {
                                 </Button>
                               </>
                             )}
-                          </td>)}
+                          </td>
+                        )}
                       </tr>
                     );
                   })}
                   {console.log(`*** products: `, products)}
                   {
-                    (
-                      <tr>
-                        <td colSpan={6} className="text-end">
-                          <strong>Products Total:</strong>
-                        </td>
-                        <td className="text-end">
-                          <strong>₹{products.reduce((acc, curr) => acc + curr?.productTotal, 0)}</strong>
-                        </td>
-                      </tr>
-                    )}
+                    <tr>
+                      <td colSpan={6} className="text-end">
+                        <strong>Products Total:</strong>
+                      </td>
+                      <td className="text-end">
+                        <strong>
+                          ₹
+                          {products.reduce(
+                            (acc, curr) => acc + curr?.productTotal,
+                            0
+                          )}
+                        </strong>
+                      </td>
+                    </tr>
+                  }
                   {
-                    (
-                      <tr>
-                        <td colSpan={6} className="text-end">
-                          <strong>Paid Total:</strong>
-                        </td>
-                        <td className="text-end">
-                          <strong>₹{order?.payments.reduce((acc, curr) => acc + curr?.advancedAmount, 0)}</strong>
-                        </td>
-                      </tr>
-                    )}
+                    <tr>
+                      <td colSpan={6} className="text-end">
+                        <strong>Paid Total:</strong>
+                      </td>
+                      <td className="text-end">
+                        <strong>
+                          ₹
+                          {order?.payments.reduce(
+                            (acc, curr) => acc + curr?.advancedAmount,
+                            0
+                          )}
+                        </strong>
+                      </td>
+                    </tr>
+                  }
                 </tbody>
               </Table>
             </div>
@@ -1521,7 +1588,11 @@ const OrderDetails = () => {
                   variant="primary"
                   size="sm"
                   style={{ fontSize: 13, fontWeight: 600 }}
-                  onClick={() => navigate(`/invoice/${id}`, { state: { orderData: order, grandTotal } })}
+                  onClick={() =>
+                    navigate(`/invoice/${id}`, {
+                      state: { orderData: order, grandTotal },
+                    })
+                  }
                   disabled={order && order.orderStatus === "cancelled"}
                 >
                   Generate Invoice
@@ -1556,8 +1627,6 @@ const OrderDetails = () => {
                 </Button>
               </div>
             )}
-
-
           </Card.Body>
         </Card>
 
@@ -1578,10 +1647,10 @@ const OrderDetails = () => {
                   value={
                     addProductId
                       ? availableToAdd
-                        .map((p) => ({ value: p._id, label: p.ProductName }))
-                        .find(
-                          (opt) => String(opt.value) === String(addProductId)
-                        )
+                          .map((p) => ({ value: p._id, label: p.ProductName }))
+                          .find(
+                            (opt) => String(opt.value) === String(addProductId)
+                          )
                       : null
                   }
                   onChange={handleProductSelect}
@@ -1596,7 +1665,9 @@ const OrderDetails = () => {
                     <Form.Control
                       type="text"
                       value={
-                        selectedAddProduct ? selectedAddProduct.availableStock : 0
+                        selectedAddProduct
+                          ? selectedAddProduct.availableStock
+                          : 0
                       }
                       disabled
                     />
@@ -1637,8 +1708,9 @@ const OrderDetails = () => {
                     <Form.Label>Price</Form.Label>
                     <Form.Control
                       type="text"
-                      value={`₹${selectedAddProduct ? selectedAddProduct.ProductPrice : 0
-                        }`}
+                      value={`₹${
+                        selectedAddProduct ? selectedAddProduct.ProductPrice : 0
+                      }`}
                       disabled
                     />
                   </Form.Group>
@@ -1650,9 +1722,10 @@ const OrderDetails = () => {
                       type="text"
                       value={
                         selectedAddProduct
-                          ? `₹${(addQty ? addQty : 1) *
-                          selectedAddProduct.ProductPrice
-                          }`
+                          ? `₹${
+                              (addQty ? addQty : 1) *
+                              selectedAddProduct.ProductPrice
+                            }`
                           : "₹0"
                       }
                       disabled
@@ -1696,7 +1769,8 @@ const OrderDetails = () => {
                 !addProductId ||
                 !addQty ||
                 addQty < 1 ||
-                (selectedAddProduct && addQty > selectedAddProduct.availableStock)
+                (selectedAddProduct &&
+                  addQty > selectedAddProduct.availableStock)
               }
               onClick={handleAddProduct}
             >
@@ -1873,8 +1947,14 @@ const OrderDetails = () => {
           </Modal.Footer>
         </Modal>
 
-        <Modal show={showGenerateModal} onHide={handleCloseGenerateModal} centered>
-          <Modal.Header style={{ borderBottom: "none", padding: "20px 20px 0" }}>
+        <Modal
+          show={showGenerateModal}
+          onHide={handleCloseGenerateModal}
+          centered
+        >
+          <Modal.Header
+            style={{ borderBottom: "none", padding: "20px 20px 0" }}
+          >
             <Modal.Title style={{ fontWeight: "600", color: "#2c3e50" }}>
               Payment
             </Modal.Title>
@@ -1891,7 +1971,9 @@ const OrderDetails = () => {
                     label="Offline"
                     type="checkbox"
                     checked={paymentData.status === "Offline"}
-                    onChange={() => setPaymentData((prev) => ({ ...prev, status: "Offline" }))}
+                    onChange={() =>
+                      setPaymentData((prev) => ({ ...prev, status: "Offline" }))
+                    }
                     style={{ marginRight: "20px" }}
                   />
                   <Form.Check
@@ -1899,7 +1981,9 @@ const OrderDetails = () => {
                     label="Online"
                     type="checkbox"
                     checked={paymentData.status === "Online"}
-                    onChange={() => setPaymentData((prev) => ({ ...prev, status: "Online" }))}
+                    onChange={() =>
+                      setPaymentData((prev) => ({ ...prev, status: "Online" }))
+                    }
                   />
                 </div>
               </Form.Group>
@@ -1922,7 +2006,12 @@ const OrderDetails = () => {
                     name="amount"
                     value={paymentData.amount}
                     max={order?.GrandTotal}
-                    onChange={(e) => setPaymentData((prev) => ({ ...prev, amount: e.target.value }))}
+                    onChange={(e) =>
+                      setPaymentData((prev) => ({
+                        ...prev,
+                        amount: e.target.value,
+                      }))
+                    }
                     placeholder="0"
                     style={{ borderRadius: "6px", borderColor: "#e0e0e0" }}
                   />
@@ -1930,7 +2019,13 @@ const OrderDetails = () => {
                 <Form.Label style={{ fontWeight: "500", color: "#34495e" }}>
                   Amount already Paid
                 </Form.Label>
-                {console.log("payments: ", order?.payments.reduce((acc, curr) => acc + curr?.advancedAmount, 0))}
+                {console.log(
+                  "payments: ",
+                  order?.payments.reduce(
+                    (acc, curr) => acc + curr?.advancedAmount,
+                    0
+                  )
+                )}
                 <div className="d-flex align-items-center">
                   <span
                     style={{
@@ -1955,7 +2050,13 @@ const OrderDetails = () => {
                 <Form.Label style={{ fontWeight: "500", color: "#34495e" }}>
                   Amount Pending
                 </Form.Label>
-                {console.log("payments: ", order?.payments.reduce((acc, curr) => acc + curr?.advancedAmount, 0))}
+                {console.log(
+                  "payments: ",
+                  order?.payments.reduce(
+                    (acc, curr) => acc + curr?.advancedAmount,
+                    0
+                  )
+                )}
                 <div className="d-flex align-items-center">
                   <span
                     style={{
@@ -1986,7 +2087,12 @@ const OrderDetails = () => {
                   <Form.Select
                     name="mode"
                     value={paymentData.mode}
-                    onChange={(e) => setPaymentData((prev) => ({ ...prev, mode: e.target.value }))}
+                    onChange={(e) =>
+                      setPaymentData((prev) => ({
+                        ...prev,
+                        mode: e.target.value,
+                      }))
+                    }
                     style={{ borderRadius: "6px", borderColor: "#e0e0e0" }}
                   >
                     <option value="">Select Payment Mode</option>
@@ -2006,7 +2112,12 @@ const OrderDetails = () => {
                   rows={3}
                   name="comments"
                   value={paymentData.comments}
-                  onChange={(e) => setPaymentData((prev) => ({ ...prev, comments: e.target.value }))}
+                  onChange={(e) =>
+                    setPaymentData((prev) => ({
+                      ...prev,
+                      comments: e.target.value,
+                    }))
+                  }
                   placeholder="Add any comments or remarks"
                   style={{
                     borderRadius: "6px",

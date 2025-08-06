@@ -61,7 +61,12 @@ const EnquiryDetails = () => {
 
   // const [availableToAdd, setAvailableToAdd] = useState([])
 
-  const gstOptions = [{ value: "0", label: "0%" }, { value: "18", label: "18%" }];
+  console.log("enquiry", enquiry);
+
+  const gstOptions = [
+    { value: "0", label: "0%" },
+    { value: "18", label: "18%" },
+  ];
 
   useEffect(() => {
     console.log("useeffect");
@@ -75,24 +80,15 @@ const EnquiryDetails = () => {
     }
   }, [enquiry]);
 
-  // useEffect(() => {
-  //   setAvailableToAdd(
-  //     allProducts.filter(
-  //       (p) => !enquiry?.products?.some((ep) => ep.id === p.id)
-  //     )
-  //   );
-  // }, [allProducts])
-
-  // Filtered products for confirm section
   const fetchFilteredInventory = async () => {
     console.log("enquiry before fetch call: ", enquiry);
-    // const enquiry = enquirydata[0];
+
     try {
       const response = await axios.get(`${ApiURL}/inventory/filter`, {
         params: {
           startDate: enquiry?.enquiryDate,
           endDate: enquiry?.endDate,
-          // slot: enquiry.enquiryTime,
+
           products: enquiry?.products.map((p) => p.productId).join(","),
         },
       });
@@ -100,7 +96,6 @@ const EnquiryDetails = () => {
       console.log(`${ApiURL}/inventory/filter: `, response.data);
       let filtered = response.data.stock;
 
-      // Preserve order as in enquiry.products
       if (enquiry?.products?.length && filtered?.length) {
         const orderMap = enquiry.products.map((p) => p.productId);
         filtered = filtered
@@ -114,55 +109,9 @@ const EnquiryDetails = () => {
       setFilteredProducts(filtered);
     } catch (error) {
       console.error("Error fetching inventory:", error);
-      //   alert("Failed to fetch inventory. Please try again.");
     }
   };
 
-  const handleUpdateQuantity = async () => {
-    try {
-      const response = await axios.put(
-        `${ApiURL}/Enquiry/update-product-data/${enquiry.enquiryId}`,
-        { productId: editProduct.productId, quantity: editQuantity }
-      );
-      if (response.status === 200) {
-        toast.success("Product quantity updated successfully!");
-        setModalIsOpen(false);
-        fetchEnquiry();
-      }
-    } catch (err) {
-      toast.error("Failed to update product quantity");
-      console.error("Error updating quantity:", err);
-    }
-  };
-
-  const handleDeleteProduct = async (productId) => {
-    if (!productId) {
-      toast.error("Product ID is missing!");
-      return;
-    }
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this product?"
-    );
-    if (!confirmDelete) return;
-
-    try {
-      const response = await axios.delete(
-        `${ApiURL}/Enquiry/delete-product-data/${enquiry._id}`,
-        { data: { productId } }
-      );
-      if (response.status === 200) {
-        toast.success("Product deleted successfully!");
-        fetchEnquiry();
-      }
-    } catch (err) {
-      toast.error("Failed to delete product.");
-      console.error("Error deleting product:", err);
-    }
-  };
-
-  // const filteredProducts = enquiry?.products
-
-  // Confirmed total
   const totalAmount = enquiry?.products?.reduce(
     (sum, p) => (confirmed[p.productId] ? sum + p.qty * p.price : sum),
     0
@@ -171,7 +120,7 @@ const EnquiryDetails = () => {
   const fetchAllProducts = async () => {
     try {
       const res = await axios.get(`${ApiURL}/product/quoteproducts`);
-      // console.log("fetch prods: ", res.data)
+
       if (res.status === 200) {
         setAllProducts(res.data.QuoteProduct || []);
       }
@@ -183,17 +132,15 @@ const EnquiryDetails = () => {
   const fetchEnquiry = async () => {
     try {
       const res = await axios.get(`${ApiURL}/enquiry/enquiry-details/${id}`);
-      // console.log(`enq res.data: `, res.data);
+
       if (res.status === 200) {
-        setEnquiry(res.data.enrichedResponse); // <-- Make sure your backend returns this
+        setEnquiry(res.data.enrichedResponse);
       }
     } catch (error) {
       console.error("Error fetching products:", error);
     }
   };
 
-  // console.log(`avaiableto add: `, availableToAdd);
-  // console.log(`alprods : `, allProducts);
   console.log("enquiry: ", enquiry);
   console.log("filtered prods: ", filteredProducts);
   const clientNo = enquiry?.clientNo || "N/A";
@@ -319,9 +266,11 @@ const EnquiryDetails = () => {
       return;
     }
 
-    const confirmedProducts = enquiry?.products.filter((product) => confirmed[product?.productId]);
-    console.log("confirmed: ", confirmedProducts)
-    console.log("products: ", enquiry?.products)
+    const confirmedProducts = enquiry?.products.filter(
+      (product) => confirmed[product?.productId]
+    );
+    console.log("confirmed: ", confirmedProducts);
+    console.log("products: ", enquiry?.products);
 
     const dataToSubmit = {
       enquiryObjectId: enquiry._id,
@@ -553,13 +502,15 @@ const EnquiryDetails = () => {
     setAddQty(1);
   };
 
-
   // const subtotal = totalAmount + Number(manpower || 0) + Number(transport || 0);
   const discountAmt = totalAmount * (Number(discount || 0) / 100);
   const totalBeforeCharges = totalAmount - discountAmt;
-  const totalAfterCharges = totalBeforeCharges + Number(manpower || 0) + Number(transport || 0);
+  const totalAfterCharges =
+    totalBeforeCharges + Number(manpower || 0) + Number(transport || 0);
   const gstAmt = totalAfterCharges * (Number(gst || 0) / 100);
-  const grandTotal = Math.round(totalAfterCharges + gstAmt + Number(roundOff || 0));
+  const grandTotal = Math.round(
+    totalAfterCharges + gstAmt + Number(roundOff || 0)
+  );
 
   const isAnyProductInsufficient = filteredProducts.some((p) => {
     const stock =
@@ -710,6 +661,7 @@ const EnquiryDetails = () => {
                 <th>Stock</th>
                 <th>Qty</th>
                 <th>Price</th>
+                <th>Advance amount</th>
                 <th>Total</th>
                 {enquiry?.status === "not send" && <th>Action</th>}
               </tr>
@@ -749,6 +701,7 @@ const EnquiryDetails = () => {
                       )}
                     </td>
                     <td>₹{p.price}</td>
+                    <td>₹{p.Advanceamount * p.qty}</td>
                     <td>₹{p.qty * p.price}</td>
                     {enquiry?.status === "not send" && (
                       <td>
@@ -946,8 +899,8 @@ const EnquiryDetails = () => {
                 value={
                   addProductId
                     ? availableToAdd
-                      ?.map((p) => ({ value: p._id, label: p.ProductName }))
-                      .find((opt) => opt.value === Number(addProductId))
+                        ?.map((p) => ({ value: p._id, label: p.ProductName }))
+                        .find((opt) => opt.value === Number(addProductId))
                     : null
                 }
                 onChange={(selected) => {
@@ -993,8 +946,9 @@ const EnquiryDetails = () => {
                   <Form.Label>Price</Form.Label>
                   <Form.Control
                     type="text"
-                    value={`₹${selectedAddProduct ? selectedAddProduct.ProductPrice : 0
-                      }`}
+                    value={`₹${
+                      selectedAddProduct ? selectedAddProduct.ProductPrice : 0
+                    }`}
                     disabled
                   />
                 </Form.Group>
@@ -1006,9 +960,10 @@ const EnquiryDetails = () => {
                     type="text"
                     value={
                       selectedAddProduct
-                        ? `₹${(addQty ? addQty : 1) *
-                        selectedAddProduct.ProductPrice
-                        }`
+                        ? `₹${
+                            (addQty ? addQty : 1) *
+                            selectedAddProduct.ProductPrice
+                          }`
                         : "₹0"
                     }
                     disabled
@@ -1221,7 +1176,11 @@ const EnquiryDetails = () => {
                 <Button
                   variant="success"
                   size="sm"
-                  style={{ fontWeight: 600, background: "#BD5525", border: "#BD5525" }}
+                  style={{
+                    fontWeight: 600,
+                    background: "#BD5525",
+                    border: "#BD5525",
+                  }}
                   disabled={totalAmount === 0 || isAnyProductInsufficient}
                   onClick={handleCreateQuote}
                 >

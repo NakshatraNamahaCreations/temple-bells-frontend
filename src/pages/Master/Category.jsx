@@ -3,7 +3,7 @@ import { Modal, Button, Form, Card, Table, Container } from "react-bootstrap";
 import { FaEdit, FaTrashAlt } from "react-icons/fa";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { ApiURL, ImageApiURL } from "../../api.js";
+import { ApiURL, ImageApiURL } from "../../api.jsx";
 import Pagination from "../../components/Pagination";
 
 const Category = () => {

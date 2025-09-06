@@ -6,7 +6,7 @@ import { Input } from "../../components/ui/Input";
 import { FaEdit, FaTrash, FaUserShield } from "react-icons/fa";
 import { Button } from "../../components/ui/Button";
 import { toast } from "react-toastify";
-import { ApiURL } from "../../api.js";
+import { ApiURL } from "../../api.jsx";
 
 const AdminRights = () => {
   const [selected, setSelected] = useState(0);
@@ -89,10 +89,7 @@ const AdminRights = () => {
 
       if (data) {
         // Edit existing user
-        const res = await axios.put(
-          `${ApiURL}/auth/users/${data.id}`,
-          payload
-        );
+        const res = await axios.put(`${ApiURL}/auth/users/${data.id}`, payload);
         if (res.status === 200) {
           alert("User updated successfully");
           clearForm();
@@ -102,9 +99,7 @@ const AdminRights = () => {
         }
       } else {
         // Register new user
-        const res = await axios.post(`${ApiURL}/auth/register`,
-          payload
-        );
+        const res = await axios.post(`${ApiURL}/auth/register`, payload);
         if (res.status === 201) {
           toast.success("✅ User registered successfully");
           clearForm();
@@ -143,13 +138,17 @@ const AdminRights = () => {
       {/* Tabs */}
       <div className="d-flex justify-content-end gap-2 mb-3">
         <button
-          className={`btn ${selected === 1 ? "btn-danger" : "btn-outline-secondary"}`}
+          className={`btn ${
+            selected === 1 ? "btn-danger" : "btn-outline-secondary"
+          }`}
           onClick={() => setSelected(1)}
         >
           Add User
         </button>
         <button
-          className={`btn ${selected === 0 ? "btn-danger" : "btn-outline-secondary"}`}
+          className={`btn ${
+            selected === 0 ? "btn-danger" : "btn-outline-secondary"
+          }`}
           onClick={() => setSelected(0)}
         >
           View Users
@@ -291,7 +290,6 @@ const AdminRights = () => {
       )}
     </div>
   );
-
 };
 
 export default AdminRights;

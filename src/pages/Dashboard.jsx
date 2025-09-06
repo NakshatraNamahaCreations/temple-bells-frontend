@@ -156,7 +156,14 @@ import axios from "axios";
 import moment from "moment";
 import { ApiURL } from "../api";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const Dashboard = () => {
   const [counts, setCounts] = useState({
@@ -211,8 +218,18 @@ const Dashboard = () => {
         [];
       // Group by month
       const months = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
       ];
       const monthly = {};
       months.forEach((m) => (monthly[m] = 0));
@@ -260,8 +277,18 @@ const Dashboard = () => {
 
   const orderData = {
     labels: [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
     ],
     datasets: [
       {

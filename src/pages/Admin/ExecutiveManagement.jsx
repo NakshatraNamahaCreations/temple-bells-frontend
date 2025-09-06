@@ -6,7 +6,7 @@ import { Input } from "../../components/ui/Input";
 import { FaEdit, FaTrash, FaUserShield } from "react-icons/fa";
 import { Button } from "../../components/ui/Button";
 import { toast } from "react-toastify";
-import { ApiURL } from "../../api.js";
+import { ApiURL } from "../../api.jsx";
 
 const ExecutiveManagement = () => {
   const [selected, setSelected] = useState(0);
@@ -89,10 +89,7 @@ const ExecutiveManagement = () => {
 
       if (data) {
         // Edit existing user
-        const res = await axios.put(
-          `${ApiURL}/executive/${data.id}`,
-          payload
-        );
+        const res = await axios.put(`${ApiURL}/executive/${data.id}`, payload);
         if (res.status === 200) {
           alert("User updated successfully");
           clearForm();
@@ -100,17 +97,13 @@ const ExecutiveManagement = () => {
           setData(null);
           getAllExecutives();
         }
-      } else {        
+      } else {
         const token = sessionStorage.getItem("token");
-        const res = await axios.post(
-          `${ApiURL}/executive`,
-          payload,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await axios.post(`${ApiURL}/executive`, payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (res.status === 201) {
           toast.success("✅ User registered successfully");
           clearForm();
@@ -149,13 +142,17 @@ const ExecutiveManagement = () => {
       {/* Tabs */}
       <div className="d-flex justify-content-end gap-2 mb-3">
         <button
-          className={`btn ${selected === 1 ? "btn-danger" : "btn-outline-secondary"}`}
+          className={`btn ${
+            selected === 1 ? "btn-danger" : "btn-outline-secondary"
+          }`}
           onClick={() => setSelected(1)}
         >
           Add Executive
         </button>
         <button
-          className={`btn ${selected === 0 ? "btn-danger" : "btn-outline-secondary"}`}
+          className={`btn ${
+            selected === 0 ? "btn-danger" : "btn-outline-secondary"
+          }`}
           onClick={() => setSelected(0)}
         >
           View Executives
@@ -297,7 +294,6 @@ const ExecutiveManagement = () => {
       )}
     </div>
   );
-
 };
 
 export default ExecutiveManagement;

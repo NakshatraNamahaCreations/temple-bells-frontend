@@ -46,16 +46,16 @@ import AdminRights from "./pages/Admin/AdminRights.jsx";
 import AdminDetails from "./pages/Admin/AdminDetails.jsx";
 import ExecutiveManagement from "./pages/Admin/ExecutiveManagement.jsx";
 import User from "./pages/Admin/User.jsx";
+import Excutivelist from "./pages/Enquiry/Excutivelist.jsx";
+import Addexcutive from "./pages/Enquiry/Addexcutive.jsx";
 
 function App() {
   return (
     <Router>
       <Toaster position="top-right" />
       <Routes>
-        {/* Public Route - No Layout (so no sidebar) */}
         <Route path="/" element={<Login />} />
 
-        {/* Protected Routes - With Layout (includes sidebar) */}
         <Route
           path="/*"
           element={
@@ -125,6 +125,8 @@ function App() {
                   path="damaged-products"
                   element={<DamagedProductList />}
                 />
+                <Route path="excutivelist" element={<Excutivelist />} />
+                <Route path="addexcutive" element={<Addexcutive />} />
                 <Route
                   path="quotation/invoice/:id"
                   element={<QuotationInvoice />}

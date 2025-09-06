@@ -71,6 +71,25 @@ const AddNewEnquiry = () => {
   const [availableDeliverySlots, setAvailableDeliverySlots] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
 
+  const [allexcutive, setallexcutive] = useState([]);
+
+  useEffect(() => {
+    fetchallexcutive();
+  }, []);
+
+  const fetchallexcutive = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8077/api/excutive/getallexcutive"
+      );
+      setallexcutive(response.data.executives);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
+  console.log("allexcutive", allexcutive);
+
   // Selected products (persisted)
   const [selectedProducts, setSelectedProducts] = useState([]);
 
@@ -329,7 +348,11 @@ const AddNewEnquiry = () => {
                       <Form.Label>Company Name</Form.Label>
                       <Form.Select
                         value={company}
-                        onChange={(e) => setCompany(e.target.value)}
+                        // onChange={(e) => setCompany(e.target.value)}
+                        onChange={(e) => {
+                          setCompany(e.target.value);
+                          setExecutive(""); // reset on company change
+                        }}
                       >
                         <option value="">Select Company Name</option>
                         {clientData.map((c) => (
@@ -356,7 +379,7 @@ const AddNewEnquiry = () => {
                     </Button>
                   </Col>
                   <Col md={6}>
-                    <Form.Group>
+                    {/* <Form.Group>
                       <Form.Label>Executive Name</Form.Label>
                       <Form.Select
                         value={executive}
@@ -372,6 +395,30 @@ const AddNewEnquiry = () => {
                                 {ex.name}
                               </option>
                             ))}
+                      </Form.Select>
+                    </Form.Group> */}
+
+                    <Form.Group>
+                      <Form.Label>Executive Name</Form.Label>
+                      <Form.Select
+                        value={executive}
+                        onChange={(e) => setExecutive(e.target.value)}
+                        disabled={!company} // <- lock until company picked
+                        title={!company ? "Select company first" : ""}
+                      >
+                        <option value="">
+                          {company
+                            ? "Select Executive Name"
+                            : "Select company first"}
+                        </option>
+
+                        {company &&
+                          allexcutive.map((ex) => (
+                            <option key={ex._id} value={ex.executivename}>
+                              {ex.executivename}
+                              {/* {ex.mobileNumber ? ` (${ex.mobileNumber})` : ""} */}
+                            </option>
+                          ))}
                       </Form.Select>
                     </Form.Group>
                   </Col>

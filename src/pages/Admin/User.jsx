@@ -34,6 +34,7 @@ function User() {
       damaged: false,
       user: false,
       orders: false,
+      excutive: false,
     },
   });
 
@@ -56,6 +57,7 @@ function User() {
       damaged: false,
       user: false,
       orders: false,
+      excutive: false,
     },
   });
 
@@ -113,6 +115,7 @@ function User() {
         damaged: member.damaged || false,
         user: member.user || false,
         orders: member.orders || false,
+        excutive: member.excutive || false,
       },
     });
     setShowEditModal(true);
@@ -173,6 +176,7 @@ function User() {
             reports: false,
             damaged: false,
             user: false,
+            excutive: false,
           },
         });
         fetchData(currentPage);
